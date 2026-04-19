@@ -207,11 +207,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     chat_sessions[user_id] = model_prive.start_chat(history=[])
     welcome = (
-        "👋 Bonjour ! Je suis **Élise**, votre assistante virtuelle E-Estate.\n\n"
-        "🏠 E-Estate est la plateforme mondiale d'immobilier tokenisé — investissez dans de vraies propriétés dès 10$ et générez un revenu passif quotidien.\n\n"
-        "Posez-moi n'importe quelle question !\n\n"
+        "👋 Salut ! Moi c'est Élise, l'assistante de John 😊\n\n"
+        "John m'a confié pour répondre à toutes tes questions sur E-Estate — investissement, propriétés, revenus passifs... je connais tout !\n\n"
+        "Pose-moi ta question, je suis là !\n\n"
         "🔗 S'inscrire : https://www.e-estate.co/agent/953277721577\n"
-        "💬 Groupe Telegram : https://t.me/+zkUewSnl1mkyODZk"
+        "💬 Rejoindre le groupe : https://t.me/+zkUewSnl1mkyODZk"
     )
     await update.message.reply_text(welcome, parse_mode="Markdown")
 
