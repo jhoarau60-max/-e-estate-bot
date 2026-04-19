@@ -143,8 +143,8 @@ Langue: TOUJOURS en français.
 NE JAMAIS mentionner d'autres plateformes concurrentes.
 """
 
-model_prive = genai.GenerativeModel(model_name="gemini-1.5-flash", system_instruction=SYSTEM_PROMPT)
-model_groupe = genai.GenerativeModel(model_name="gemini-1.5-flash", system_instruction=GROUP_PROMPT)
+model_prive = genai.GenerativeModel(model_name="gemini-2.0-flash", system_instruction=SYSTEM_PROMPT)
+model_groupe = genai.GenerativeModel(model_name="gemini-2.0-flash", system_instruction=GROUP_PROMPT)
 
 chat_sessions = {}
 last_group_message = datetime.now()
