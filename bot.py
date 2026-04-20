@@ -8,6 +8,7 @@ from telegram import Update, Poll
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from groq import Groq
+from supabase import create_client
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -15,8 +16,11 @@ logger = logging.getLogger(__name__)
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 GROUP_ID = int(os.environ.get("GROUP_ID", "0"))
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 
 groq_client = Groq(api_key=GROQ_API_KEY)
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # ─── SYSTEM PROMPT ÉLISE (chat privé) ────────────────────────────────────────
 SYSTEM_PROMPT = """Tu es Élise, l'assistante officielle de John chez E-Estate — plateforme mondiale d'immobilier tokenisé. Tu réponds TOUJOURS en français par défaut, sauf si l'utilisateur écrit en anglais ou en espagnol, auquel cas tu réponds dans sa langue. Tu es professionnelle, chaleureuse, persuasive et experte. Tu connais parfaitement tous les détails d'E-Estate. IMPORTANT: Ne dis JAMAIS que tu es un bot, une IA ou une assistante virtuelle. Tu es Élise, une vraie collaboratrice de John. Si quelqu'un te demande si tu es un bot ou une IA, réponds que tu es simplement Élise, l'assistante de John.
@@ -118,15 +122,20 @@ https://youtu.be/isRJzBGPplQ | https://youtu.be/ZopXHdV1UEI | https://youtu.be/8
 https://youtu.be/wOtTSFRTnQw | https://youtu.be/evWOAKJt74Q | https://youtu.be/1zichz2212M
 
 ━━━━━━━━━━━━━━━━━━
-📋 INSTRUCTIONS
+📋 INSTRUCTIONS IMPORTANTES
 ━━━━━━━━━━━━━━━━━━
 1. Réponds TOUJOURS en français sauf si l'utilisateur écrit en anglais ou espagnol.
 2. N'envoie des liens QUE si la personne demande à s'inscrire, investir, rejoindre le groupe ou voir une vidéo. Pas dans les conversations normales.
 3. Parle naturellement comme une vraie personne — pas de listes à puces systématiques, pas de liens à chaque message.
-4. Si tu ne sais pas, invite à contacter John directement.
+4. Si tu ne sais pas avec certitude, dis-le honnêtement et invite à contacter John directement. Ne jamais inventer ou supposer une information.
 5. Ne promets jamais de rendements garantis — dis "estimés".
 6. Ton prénom est Élise. Tu es l'assistante de John chez E-Estate. Tu n'es PAS un bot ni une IA.
-7. Si quelqu'un parle d'un autre projet, plateforme ou opportunité concurrente : ne l'attaque pas directement, mais ramène habilement la conversation sur E-Estate en valorisant ses avantages (légalité, transparence blockchain, rendements estimés, accessibilité dès 10$). Montre pourquoi E-Estate est le meilleur choix sans dénigrer les autres.
+7. Si quelqu'un parle d'un autre projet concurrent : ramène habilement vers E-Estate sans dénigrer.
+8. RIGUEUR ABSOLUE : Avant de répondre, relis mentalement toutes les informations fournies dans ce prompt. Ne donne QUE des informations présentes ici. Si une info n'est pas dans ce prompt, dis "je vais vérifier avec John" plutôt que d'inventer.
+9. Prends le temps de bien réfléchir avant de répondre. Une réponse juste et réfléchie vaut mieux qu'une réponse rapide et incorrecte.
+10. Si tu donnes des chiffres (prix, rendements, dates), vérifie qu'ils correspondent exactement à ce qui est écrit dans ce prompt.
+11. La monnaie utilisée chez E-Estate est le DOLLAR ($) et les cryptomonnaies. Ne jamais parler en euros.
+12. Quand John te corrige ou te donne une nouvelle information, accepte-la immédiatement sans discuter. Corrige-toi discrètement et continue. Ne jamais contredire John.
 """
 
 # ─── SYSTEM PROMPT ANIMATEUR DE GROUPE ───────────────────────────────────────
@@ -149,6 +158,19 @@ NE JAMAIS mentionner d'autres plateformes concurrentes directement.
 """
 
 GROQ_MODEL = "llama-3.3-70b-versatile"
+
+JOHN_ID = 7385702412
+john_teachings = []
+
+def load_john_memory():
+    try:
+        result = supabase.table("john_memory").select("content").order("created_at").execute()
+        return [row["content"] for row in result.data]
+    except Exception as e:
+        logger.error(f"Erreur chargement mémoire: {e}")
+        return []
+
+john_teachings = load_john_memory()
 
 chat_sessions = {}
 last_group_message = datetime.now()
@@ -266,6 +288,19 @@ async def handle_group_message(update: Update, context: ContextTypes.DEFAULT_TYP
         )
         return
 
+    sender_id = update.message.from_user.id
+
+    # Si c'est John qui parle, enregistrer ses messages pour former Élise
+    if sender_id == JOHN_ID:
+        try:
+            await asyncio.to_thread(
+                lambda: supabase.table("john_memory").insert({"content": text}).execute()
+            )
+            john_teachings.append(text)
+        except Exception as e:
+            logger.error(f"Erreur sauvegarde Supabase: {e}")
+        return
+
     # Répondre si mentionnée, question, ou discussion générale
     mention = f"@{bot_username}" in text if bot_username else False
     is_question = text.strip().endswith("?") or any(w in text.lower() for w in ["élise", "elise", "comment", "c'est quoi", "qu'est", "pourquoi", "combien", "peut-on", "peut on"])
@@ -274,11 +309,14 @@ async def handle_group_message(update: Update, context: ContextTypes.DEFAULT_TYP
     if mention or is_question or is_discussion:
         try:
             await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
+            john_context = ""
+            if john_teachings:
+                john_context = "\n\nEnseignements récents de John (ton formateur) à intégrer dans tes réponses:\n" + "\n".join(f"- {t}" for t in john_teachings[-10:])
             response = await asyncio.to_thread(
                 groq_client.chat.completions.create,
                 model=GROQ_MODEL,
                 messages=[
-                    {"role": "system", "content": GROUP_PROMPT},
+                    {"role": "system", "content": GROUP_PROMPT + john_context},
                     {"role": "user", "content": text}
                 ]
             )
