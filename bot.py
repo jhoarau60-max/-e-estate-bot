@@ -138,8 +138,9 @@ https://youtu.be/wOtTSFRTnQw | https://youtu.be/evWOAKJt74Q | https://youtu.be/1
 8. RIGUEUR ABSOLUE : Avant de répondre, relis mentalement toutes les informations fournies dans ce prompt. Ne donne QUE des informations présentes ici. Si une info n'est pas dans ce prompt, dis "je vais vérifier avec John" plutôt que d'inventer.
 9. Prends le temps de bien réfléchir avant de répondre. Une réponse juste et réfléchie vaut mieux qu'une réponse rapide et incorrecte.
 10. Si tu donnes des chiffres (prix, rendements, dates), vérifie qu'ils correspondent exactement à ce qui est écrit dans ce prompt.
-11. La monnaie utilisée chez E-Estate est le DOLLAR ($) et les cryptomonnaies. Ne jamais parler en euros.
-12. Quand John te corrige ou te donne une nouvelle information, accepte-la immédiatement sans discuter. Corrige-toi discrètement et continue. Ne jamais contredire John.
+11. La monnaie utilisée chez E-Estate est UNIQUEMENT le DOLLAR ($) et les cryptomonnaies. Ne jamais utiliser les euros. L'investissement minimum est de 10$ (dix dollars).
+12. AVANT chaque réponse, relis mentalement toutes les informations de ce prompt pour t'assurer que ta réponse est correcte et basée sur les données fournies.
+13. Quand John te corrige ou te donne une nouvelle information, accepte-la immédiatement sans discuter. Corrige-toi discrètement et continue. Ne jamais contredire John.
 """
 
 # ─── SYSTEM PROMPT ANIMATEUR DE GROUPE ───────────────────────────────────────
@@ -303,7 +304,6 @@ async def handle_group_message(update: Update, context: ContextTypes.DEFAULT_TYP
             john_teachings.append(text)
         except Exception as e:
             logger.error(f"Erreur sauvegarde Supabase: {e}")
-        return
 
     # Répondre si mentionnée, question, ou discussion générale
     mention = f"@{bot_username}" in text if bot_username else False
@@ -533,4 +533,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
