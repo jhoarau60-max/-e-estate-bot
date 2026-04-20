@@ -1,803 +1,462 @@
-{
-  "models": [
-    {
-      "name": "models/gemini-2.5-flash",
-      "version": "001",
-      "displayName": "Gemini 2.5 Flash",
-      "description": "Stable version of Gemini 2.5 Flash, our mid-size multimodal model that supports up to 1 million tokens, released in June of 2025.",
-      "inputTokenLimit": 1048576,
-      "outputTokenLimit": 65536,
-      "supportedGenerationMethods": [
-        "generateContent",
-        "countTokens",
-        "createCachedContent",
-        "batchGenerateContent"
-      ],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 64,
-      "maxTemperature": 2,
-      "thinking": true
-    },
-    {
-      "name": "models/gemini-2.5-pro",
-      "version": "2.5",
-      "displayName": "Gemini 2.5 Pro",
-      "description": "Stable release (June 17th, 2025) of Gemini 2.5 Pro",
-      "inputTokenLimit": 1048576,
-      "outputTokenLimit": 65536,
-      "supportedGenerationMethods": [
-        "generateContent",
-        "countTokens",
-        "createCachedContent",
-        "batchGenerateContent"
-      ],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 64,
-      "maxTemperature": 2,
-      "thinking": true
-    },
-    {
-      "name": "models/gemini-2.0-flash",
-      "version": "2.0",
-      "displayName": "Gemini 2.0 Flash",
-      "description": "Gemini 2.0 Flash",
-      "inputTokenLimit": 1048576,
-      "outputTokenLimit": 8192,
-      "supportedGenerationMethods": [
-        "generateContent",
-        "countTokens",
-        "createCachedContent",
-        "batchGenerateContent"
-      ],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 40,
-      "maxTemperature": 2
-    },
-    {
-      "name": "models/gemini-2.0-flash-001",
-      "version": "2.0",
-      "displayName": "Gemini 2.0 Flash 001",
-      "description": "Stable version of Gemini 2.0 Flash, our fast and versatile multimodal model for scaling across diverse tasks, released in January of 2025.",
-      "inputTokenLimit": 1048576,
-      "outputTokenLimit": 8192,
-      "supportedGenerationMethods": [
-        "generateContent",
-        "countTokens",
-        "createCachedContent",
-        "batchGenerateContent"
-      ],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 40,
-      "maxTemperature": 2
-    },
-    {
-      "name": "models/gemini-2.0-flash-lite-001",
-      "version": "2.0",
-      "displayName": "Gemini 2.0 Flash-Lite 001",
-      "description": "Stable version of Gemini 2.0 Flash-Lite",
-      "inputTokenLimit": 1048576,
-      "outputTokenLimit": 8192,
-      "supportedGenerationMethods": [
-        "generateContent",
-        "countTokens",
-        "createCachedContent",
-        "batchGenerateContent"
-      ],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 40,
-      "maxTemperature": 2
-    },
-    {
-      "name": "models/gemini-2.0-flash-lite",
-      "version": "2.0",
-      "displayName": "Gemini 2.0 Flash-Lite",
-      "description": "Gemini 2.0 Flash-Lite",
-      "inputTokenLimit": 1048576,
-      "outputTokenLimit": 8192,
-      "supportedGenerationMethods": [
-        "generateContent",
-        "countTokens",
-        "createCachedContent",
-        "batchGenerateContent"
-      ],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 40,
-      "maxTemperature": 2
-    },
-    {
-      "name": "models/gemini-2.5-flash-preview-tts",
-      "version": "gemini-2.5-flash-exp-tts-2025-05-19",
-      "displayName": "Gemini 2.5 Flash Preview TTS",
-      "description": "Gemini 2.5 Flash Preview TTS",
-      "inputTokenLimit": 8192,
-      "outputTokenLimit": 16384,
-      "supportedGenerationMethods": [
-        "countTokens",
-        "generateContent"
-      ],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 64,
-      "maxTemperature": 2
-    },
-    {
-      "name": "models/gemini-2.5-pro-preview-tts",
-      "version": "gemini-2.5-pro-preview-tts-2025-05-19",
-      "displayName": "Gemini 2.5 Pro Preview TTS",
-      "description": "Gemini 2.5 Pro Preview TTS",
-      "inputTokenLimit": 8192,
-      "outputTokenLimit": 16384,
-      "supportedGenerationMethods": [
-        "countTokens",
-        "generateContent",
-        "batchGenerateContent"
-      ],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 64,
-      "maxTemperature": 2
-    },
-    {
-      "name": "models/gemma-3-1b-it",
-      "version": "001",
-      "displayName": "Gemma 3 1B",
-      "inputTokenLimit": 32768,
-      "outputTokenLimit": 8192,
-      "supportedGenerationMethods": [
-        "generateContent",
-        "countTokens"
-      ],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 64
-    },
-    {
-      "name": "models/gemma-3-4b-it",
-      "version": "001",
-      "displayName": "Gemma 3 4B",
-      "inputTokenLimit": 32768,
-      "outputTokenLimit": 8192,
-      "supportedGenerationMethods": [
-        "generateContent",
-        "countTokens"
-      ],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 64
-    },
-    {
-      "name": "models/gemma-3-12b-it",
-      "version": "001",
-      "displayName": "Gemma 3 12B",
-      "inputTokenLimit": 32768,
-      "outputTokenLimit": 8192,
-      "supportedGenerationMethods": [
-        "generateContent",
-        "countTokens"
-      ],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 64
-    },
-    {
-      "name": "models/gemma-3-27b-it",
-      "version": "001",
-      "displayName": "Gemma 3 27B",
-      "inputTokenLimit": 131072,
-      "outputTokenLimit": 8192,
-      "supportedGenerationMethods": [
-        "generateContent",
-        "countTokens"
-      ],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 64
-    },
-    {
-      "name": "models/gemma-3n-e4b-it",
-      "version": "001",
-      "displayName": "Gemma 3n E4B",
-      "inputTokenLimit": 8192,
-      "outputTokenLimit": 2048,
-      "supportedGenerationMethods": [
-        "generateContent",
-        "countTokens"
-      ],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 64
-    },
-    {
-      "name": "models/gemma-3n-e2b-it",
-      "version": "001",
-      "displayName": "Gemma 3n E2B",
-      "inputTokenLimit": 8192,
-      "outputTokenLimit": 2048,
-      "supportedGenerationMethods": [
-        "generateContent",
-        "countTokens"
-      ],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 64
-    },
-    {
-      "name": "models/gemma-4-26b-a4b-it",
-      "version": "001",
-      "displayName": "Gemma 4 26B A4B IT",
-      "description": "Gemma 4 26B A4B IT",
-      "inputTokenLimit": 262144,
-      "outputTokenLimit": 32768,
-      "supportedGenerationMethods": [
-        "generateContent",
-        "countTokens"
-      ],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 64,
-      "maxTemperature": 2,
-      "thinking": true
-    },
-    {
-      "name": "models/gemma-4-31b-it",
-      "version": "001",
-      "displayName": "Gemma 4 31B IT",
-      "description": "Gemma 4 31B IT",
-      "inputTokenLimit": 262144,
-      "outputTokenLimit": 32768,
-      "supportedGenerationMethods": [
-        "generateContent",
-        "countTokens"
-      ],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 64,
-      "maxTemperature": 2,
-      "thinking": true
-    },
-    {
-      "name": "models/gemini-flash-latest",
-      "version": "Gemini Flash Latest",
-      "displayName": "Gemini Flash Latest",
-      "description": "Latest release of Gemini Flash",
-      "inputTokenLimit": 1048576,
-      "outputTokenLimit": 65536,
-      "supportedGenerationMethods": [
-        "generateContent",
-        "countTokens",
-        "createCachedContent",
-        "batchGenerateContent"
-      ],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 64,
-      "maxTemperature": 2,
-      "thinking": true
-    },
-    {
-      "name": "models/gemini-flash-lite-latest",
-      "version": "Gemini Flash-Lite Latest",
-      "displayName": "Gemini Flash-Lite Latest",
-      "description": "Latest release of Gemini Flash-Lite",
-      "inputTokenLimit": 1048576,
-      "outputTokenLimit": 65536,
-      "supportedGenerationMethods": [
-        "generateContent",
-        "countTokens",
-        "createCachedContent",
-        "batchGenerateContent"
-      ],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 64,
-      "maxTemperature": 2,
-      "thinking": true
-    },
-    {
-      "name": "models/gemini-pro-latest",
-      "version": "Gemini Pro Latest",
-      "displayName": "Gemini Pro Latest",
-      "description": "Latest release of Gemini Pro",
-      "inputTokenLimit": 1048576,
-      "outputTokenLimit": 65536,
-      "supportedGenerationMethods": [
-        "generateContent",
-        "countTokens",
-        "createCachedContent",
-        "batchGenerateContent"
-      ],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 64,
-      "maxTemperature": 2,
-      "thinking": true
-    },
-    {
-      "name": "models/gemini-2.5-flash-lite",
-      "version": "001",
-      "displayName": "Gemini 2.5 Flash-Lite",
-      "description": "Stable version of Gemini 2.5 Flash-Lite, released in July of 2025",
-      "inputTokenLimit": 1048576,
-      "outputTokenLimit": 65536,
-      "supportedGenerationMethods": [
-        "generateContent",
-        "countTokens",
-        "createCachedContent",
-        "batchGenerateContent"
-      ],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 64,
-      "maxTemperature": 2,
-      "thinking": true
-    },
-    {
-      "name": "models/gemini-2.5-flash-image",
-      "version": "2.0",
-      "displayName": "Nano Banana",
-      "description": "Gemini 2.5 Flash Preview Image",
-      "inputTokenLimit": 32768,
-      "outputTokenLimit": 32768,
-      "supportedGenerationMethods": [
-        "generateContent",
-        "countTokens",
-        "batchGenerateContent"
-      ],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 64,
-      "maxTemperature": 1
-    },
-    {
-      "name": "models/gemini-3-pro-preview",
-      "version": "3-pro-preview-11-2025",
-      "displayName": "Gemini 3 Pro Preview",
-      "description": "Gemini 3 Pro Preview",
-      "inputTokenLimit": 1048576,
-      "outputTokenLimit": 65536,
-      "supportedGenerationMethods": [
-        "generateContent",
-        "countTokens",
-        "createCachedContent",
-        "batchGenerateContent"
-      ],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 64,
-      "maxTemperature": 2,
-      "thinking": true
-    },
-    {
-      "name": "models/gemini-3-flash-preview",
-      "version": "3-flash-preview-12-2025",
-      "displayName": "Gemini 3 Flash Preview",
-      "description": "Gemini 3 Flash Preview",
-      "inputTokenLimit": 1048576,
-      "outputTokenLimit": 65536,
-      "supportedGenerationMethods": [
-        "generateContent",
-        "countTokens",
-        "createCachedContent",
-        "batchGenerateContent"
-      ],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 64,
-      "maxTemperature": 2,
-      "thinking": true
-    },
-    {
-      "name": "models/gemini-3.1-pro-preview",
-      "version": "3.1-pro-preview-01-2026",
-      "displayName": "Gemini 3.1 Pro Preview",
-      "description": "Gemini 3.1 Pro Preview",
-      "inputTokenLimit": 1048576,
-      "outputTokenLimit": 65536,
-      "supportedGenerationMethods": [
-        "generateContent",
-        "countTokens",
-        "createCachedContent",
-        "batchGenerateContent"
-      ],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 64,
-      "maxTemperature": 2,
-      "thinking": true
-    },
-    {
-      "name": "models/gemini-3.1-pro-preview-customtools",
-      "version": "3.1-pro-preview-01-2026",
-      "displayName": "Gemini 3.1 Pro Preview Custom Tools",
-      "description": "Gemini 3.1 Pro Preview optimized for custom tool usage",
-      "inputTokenLimit": 1048576,
-      "outputTokenLimit": 65536,
-      "supportedGenerationMethods": [
-        "generateContent",
-        "countTokens",
-        "createCachedContent",
-        "batchGenerateContent"
-      ],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 64,
-      "maxTemperature": 2,
-      "thinking": true
-    },
-    {
-      "name": "models/gemini-3.1-flash-lite-preview",
-      "version": "3.1-flash-lite-preview-03-2026",
-      "displayName": "Gemini 3.1 Flash Lite Preview",
-      "description": "Gemini 3.1 Flash Lite Preview",
-      "inputTokenLimit": 1048576,
-      "outputTokenLimit": 65536,
-      "supportedGenerationMethods": [
-        "generateContent",
-        "countTokens",
-        "createCachedContent",
-        "batchGenerateContent"
-      ],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 64,
-      "maxTemperature": 2,
-      "thinking": true
-    },
-    {
-      "name": "models/gemini-3-pro-image-preview",
-      "version": "3.0",
-      "displayName": "Nano Banana Pro",
-      "description": "Gemini 3 Pro Image Preview",
-      "inputTokenLimit": 131072,
-      "outputTokenLimit": 32768,
-      "supportedGenerationMethods": [
-        "generateContent",
-        "countTokens",
-        "batchGenerateContent"
-      ],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 64,
-      "maxTemperature": 1,
-      "thinking": true
-    },
-    {
-      "name": "models/nano-banana-pro-preview",
-      "version": "3.0",
-      "displayName": "Nano Banana Pro",
-      "description": "Gemini 3 Pro Image Preview",
-      "inputTokenLimit": 131072,
-      "outputTokenLimit": 32768,
-      "supportedGenerationMethods": [
-        "generateContent",
-        "countTokens",
-        "batchGenerateContent"
-      ],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 64,
-      "maxTemperature": 1,
-      "thinking": true
-    },
-    {
-      "name": "models/gemini-3.1-flash-image-preview",
-      "version": "3.0",
-      "displayName": "Nano Banana 2",
-      "description": "Gemini 3.1 Flash Image Preview.",
-      "inputTokenLimit": 65536,
-      "outputTokenLimit": 65536,
-      "supportedGenerationMethods": [
-        "generateContent",
-        "countTokens",
-        "batchGenerateContent"
-      ],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 64,
-      "maxTemperature": 1,
-      "thinking": true
-    },
-    {
-      "name": "models/lyria-3-clip-preview",
-      "version": "lyria-3-clip-preview",
-      "displayName": "Lyria 3 Clip Preview",
-      "description": "Lyria 3 30s model Preview",
-      "inputTokenLimit": 1048576,
-      "outputTokenLimit": 65536,
-      "supportedGenerationMethods": [
-        "generateContent",
-        "countTokens"
-      ],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 64,
-      "maxTemperature": 2
-    },
-    {
-      "name": "models/lyria-3-pro-preview",
-      "version": "lyria-3-pro-preview",
-      "displayName": "Lyria 3 Pro Preview",
-      "description": "Lyria 3 Pro Preview",
-      "inputTokenLimit": 1048576,
-      "outputTokenLimit": 65536,
-      "supportedGenerationMethods": [
-        "generateContent",
-        "countTokens"
-      ],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 64,
-      "maxTemperature": 2
-    },
-    {
-      "name": "models/gemini-3.1-flash-tts-preview",
-      "version": "3.1-flash-tts-preview",
-      "displayName": "Gemini 3.1 Flash TTS Preview",
-      "description": "Gemini 3.1 Flash TTS Preview",
-      "inputTokenLimit": 8192,
-      "outputTokenLimit": 16384,
-      "supportedGenerationMethods": [
-        "generateContent",
-        "countTokens",
-        "batchGenerateContent"
-      ],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 64,
-      "maxTemperature": 2,
-      "thinking": true
-    },
-    {
-      "name": "models/gemini-robotics-er-1.5-preview",
-      "version": "1.5-preview",
-      "displayName": "Gemini Robotics-ER 1.5 Preview",
-      "description": "Gemini Robotics-ER 1.5 Preview",
-      "inputTokenLimit": 1048576,
-      "outputTokenLimit": 65536,
-      "supportedGenerationMethods": [
-        "generateContent",
-        "countTokens"
-      ],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 64,
-      "maxTemperature": 2,
-      "thinking": true
-    },
-    {
-      "name": "models/gemini-robotics-er-1.6-preview",
-      "version": "1.6-preview",
-      "displayName": "Gemini Robotics-ER 1.6 Preview",
-      "description": "Gemini Robotics-ER 1.6 Preview",
-      "inputTokenLimit": 131072,
-      "outputTokenLimit": 65536,
-      "supportedGenerationMethods": [
-        "generateContent",
-        "countTokens",
-        "createCachedContent",
-        "batchGenerateContent"
-      ],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 64,
-      "maxTemperature": 2,
-      "thinking": true
-    },
-    {
-      "name": "models/gemini-2.5-computer-use-preview-10-2025",
-      "version": "Gemini 2.5 Computer Use Preview 10-2025",
-      "displayName": "Gemini 2.5 Computer Use Preview 10-2025",
-      "description": "Gemini 2.5 Computer Use Preview 10-2025",
-      "inputTokenLimit": 131072,
-      "outputTokenLimit": 65536,
-      "supportedGenerationMethods": [
-        "generateContent",
-        "countTokens"
-      ],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 64,
-      "maxTemperature": 2,
-      "thinking": true
-    },
-    {
-      "name": "models/deep-research-pro-preview-12-2025",
-      "version": "deepthink-exp-05-20",
-      "displayName": "Deep Research Pro Preview (Dec-12-2025)",
-      "description": "Preview release (December 12th, 2025) of Deep Research Pro",
-      "inputTokenLimit": 131072,
-      "outputTokenLimit": 65536,
-      "supportedGenerationMethods": [
-        "generateContent",
-        "countTokens"
-      ],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 64,
-      "maxTemperature": 2,
-      "thinking": true
-    },
-    {
-      "name": "models/gemini-embedding-001",
-      "version": "001",
-      "displayName": "Gemini Embedding 001",
-      "description": "Obtain a distributed representation of a text.",
-      "inputTokenLimit": 2048,
-      "outputTokenLimit": 1,
-      "supportedGenerationMethods": [
-        "embedContent",
-        "countTextTokens",
-        "countTokens",
-        "asyncBatchEmbedContent"
-      ]
-    },
-    {
-      "name": "models/gemini-embedding-2-preview",
-      "version": "2",
-      "displayName": "Gemini Embedding 2 Preview",
-      "description": "Obtain a distributed representation of multimodal content.",
-      "inputTokenLimit": 8192,
-      "outputTokenLimit": 1,
-      "supportedGenerationMethods": [
-        "embedContent",
-        "countTextTokens",
-        "countTokens",
-        "asyncBatchEmbedContent"
-      ]
-    },
-    {
-      "name": "models/aqa",
-      "version": "001",
-      "displayName": "Model that performs Attributed Question Answering.",
-      "description": "Model trained to return answers to questions that are grounded in provided sources, along with estimating answerable probability.",
-      "inputTokenLimit": 7168,
-      "outputTokenLimit": 1024,
-      "supportedGenerationMethods": [
-        "generateAnswer"
-      ],
-      "temperature": 0.2,
-      "topP": 1,
-      "topK": 40
-    },
-    {
-      "name": "models/imagen-4.0-generate-001",
-      "version": "001",
-      "displayName": "Imagen 4",
-      "description": "Vertex served Imagen 4.0 model",
-      "inputTokenLimit": 480,
-      "outputTokenLimit": 8192,
-      "supportedGenerationMethods": [
-        "predict"
-      ]
-    },
-    {
-      "name": "models/imagen-4.0-ultra-generate-001",
-      "version": "001",
-      "displayName": "Imagen 4 Ultra",
-      "description": "Vertex served Imagen 4.0 ultra model",
-      "inputTokenLimit": 480,
-      "outputTokenLimit": 8192,
-      "supportedGenerationMethods": [
-        "predict"
-      ]
-    },
-    {
-      "name": "models/imagen-4.0-fast-generate-001",
-      "version": "001",
-      "displayName": "Imagen 4 Fast",
-      "description": "Vertex served Imagen 4.0 Fast model",
-      "inputTokenLimit": 480,
-      "outputTokenLimit": 8192,
-      "supportedGenerationMethods": [
-        "predict"
-      ]
-    },
-    {
-      "name": "models/veo-2.0-generate-001",
-      "version": "2.0",
-      "displayName": "Veo 2",
-      "description": "Vertex served Veo 2 model. Access to this model requires billing to be enabled on the associated Google Cloud Platform account. Please visit https://console.cloud.google.com/billing to enable it.",
-      "inputTokenLimit": 480,
-      "outputTokenLimit": 8192,
-      "supportedGenerationMethods": [
-        "predictLongRunning"
-      ]
-    },
-    {
-      "name": "models/veo-3.0-generate-001",
-      "version": "3.0",
-      "displayName": "Veo 3",
-      "description": "Veo 3",
-      "inputTokenLimit": 480,
-      "outputTokenLimit": 8192,
-      "supportedGenerationMethods": [
-        "predictLongRunning"
-      ]
-    },
-    {
-      "name": "models/veo-3.0-fast-generate-001",
-      "version": "3.0",
-      "displayName": "Veo 3 fast",
-      "description": "Veo 3 fast",
-      "inputTokenLimit": 480,
-      "outputTokenLimit": 8192,
-      "supportedGenerationMethods": [
-        "predictLongRunning"
-      ]
-    },
-    {
-      "name": "models/veo-3.1-generate-preview",
-      "version": "3.1",
-      "displayName": "Veo 3.1",
-      "description": "Veo 3.1",
-      "inputTokenLimit": 480,
-      "outputTokenLimit": 8192,
-      "supportedGenerationMethods": [
-        "predictLongRunning"
-      ]
-    },
-    {
-      "name": "models/veo-3.1-fast-generate-preview",
-      "version": "3.1",
-      "displayName": "Veo 3.1 fast",
-      "description": "Veo 3.1 fast",
-      "inputTokenLimit": 480,
-      "outputTokenLimit": 8192,
-      "supportedGenerationMethods": [
-        "predictLongRunning"
-      ]
-    },
-    {
-      "name": "models/veo-3.1-lite-generate-preview",
-      "version": "3.1",
-      "displayName": "Veo 3.1 lite",
-      "description": "Veo 3.1 lite",
-      "inputTokenLimit": 480,
-      "outputTokenLimit": 8192,
-      "supportedGenerationMethods": [
-        "predictLongRunning"
-      ]
-    },
-    {
-      "name": "models/gemini-2.5-flash-native-audio-latest",
-      "version": "Gemini 2.5 Flash Native Audio Latest",
-      "displayName": "Gemini 2.5 Flash Native Audio Latest",
-      "description": "Latest release of Gemini 2.5 Flash Native Audio",
-      "inputTokenLimit": 131072,
-      "outputTokenLimit": 8192,
-      "supportedGenerationMethods": [
-        "countTokens",
-        "bidiGenerateContent"
-      ],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 64,
-      "maxTemperature": 2,
-      "thinking": true
-    },
-    {
-      "name": "models/gemini-2.5-flash-native-audio-preview-09-2025",
-      "version": "gemini-2.5-flash-preview-native-audio-dialog-2025-05-19",
-      "displayName": "Gemini 2.5 Flash Native Audio Preview 09-2025",
-      "description": "Gemini 2.5 Flash Native Audio Preview 09-2025",
-      "inputTokenLimit": 131072,
-      "outputTokenLimit": 8192,
-      "supportedGenerationMethods": [
-        "countTokens",
-        "bidiGenerateContent"
-      ],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 64,
-      "maxTemperature": 2,
-      "thinking": true
-    }
-  ],
-  "nextPageToken": "CjRtb2RlbHMvZ2VtaW5pLTIuNS1mbGFzaC1uYXRpdmUtYXVkaW8tcHJldmlldy0wOS0yMDI1"
-}
+import os
+import logging
+import random
+import asyncio
+from datetime import datetime
+from telegram import Update, Poll
+from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from google import genai
+from google.genai import types
+
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+GROUP_ID = int(os.environ.get("GROUP_ID", "0"))
+
+client = genai.Client(api_key=GEMINI_API_KEY)
+
+# ─── SYSTEM PROMPT ÉLISE (chat privé) ────────────────────────────────────────
+SYSTEM_PROMPT = """Tu es Élise, l'assistante virtuelle officielle d'E-Estate — plateforme mondiale d'immobilier tokenisé. Tu réponds TOUJOURS en français par défaut, sauf si l'utilisateur écrit en anglais ou en espagnol, auquel cas tu réponds dans sa langue. Tu es professionnelle, chaleureuse, persuasive et experte. Tu connais parfaitement tous les détails d'E-Estate.
+
+━━━━━━━━━━━━━━━━━━
+🏢 ENTREPRISE
+━━━━━━━━━━━━━━━━━━
+- Nom légal: E-ESTATE GROUP INC (Société Anonyme)
+- Enregistrée au Panama le 12 novembre 2024, N° 155759261
+- Enregistrement fédéral au Canada: N° 17784465
+- Enregistrement à New York State (DOS)
+- LEI certifié: 98450043QA466E0C9I68 (actif depuis janv. 2025, vérifié sur Bloomberg)
+- Adresse: Global Bank Tower, 32e étage, Suite 3207, 50th Street, Panama City, Panama
+- Email: info@e-estate.co
+- Site web: https://www.e-estate.co
+- Boutique officielle: https://e-estate.shop/collections/all
+- Partenaire officiel ARDR (Association of Real Digital Realtors) depuis déc. 2024
+- Lancé en 2025 — portefeuille actifs tokenisés: +150 millions USD (confirmé presse 2025)
+- Vision stratégique jusqu'en 2034
+
+Fondateurs:
+- Brandon Stephenson: CEO & cofondateur — vision, stratégie, ex-collaborateur de REMAX (fondé par Dave Lineger)
+- Mike Hamilton: cofondateur — gestion d'assets, propriétaire de ELI PROPERTY GROUP INC (bras opérationnel physique)
+- Peter Stephenson (frère de Brandon): +25 ans expérience immobilière, lien entre technologie et marché physique
+
+━━━━━━━━━━━━━━━━━━
+💡 CONCEPT
+━━━━━━━━━━━━━━━━━━
+E-Estate tokenise l'immobilier physique sur la blockchain Binance Smart Chain (BSC). Chaque token EST = 1 USD de propriété réelle. Tout le monde peut investir dans l'immobilier dès 10$, sans être millionnaire.
+
+Modèle en 2 phases:
+- Phase 1 (18 mois): Revenu actif accéléré avec rendement amélioré
+- Phase 2 (à vie): Revenu passif ~10%/an tant que la propriété est gérée par E-Estate
+
+Mécanisme de protection: si une propriété génère moins de 10% de revenus annuels, E-Estate rachète les tokens des investisseurs → protection du capital.
+
+Pour les projets Dubaï (en construction): pas de Phase 2 — une fois construits, vendus au prix maximum, le capital est retourné aux investisseurs + réinvesti dans de nouvelles propriétés.
+
+Blockchain = transparence totale, contrats SMART immuables, vérification légale de chaque propriété.
+
+━━━━━━━━━━━━━━━━━━
+🏠 PROPRIÉTÉS DISPONIBLES
+━━━━━━━━━━━━━━━━━━
+1. Apartments MIA — Miami, Floride, USA
+   - Investissement minimum: 10 USD (1 EST)
+   - Profit quotidien: 0.32% à 0.52%
+
+2. Desert Villa — Indio, Californie, USA
+   - Valeur: 1 520 000 USD — 152 000 EST tokens
+   - Surface: 3 308 sqft, 5 chambres, 5 SDB, piscine
+   - Revenu locatif annuel estimé: 275 000 – 315 000 USD
+
+3. Villa Maui — Kihei, Hawaii, USA
+   - Valeur: 3 300 000 USD — 330 000 EST tokens
+   - Surface: 3 169 sqft, 2 chambres, piscine Gunite + jacuzzi
+   - Revenu locatif annuel estimé: 650 000 – 720 000 USD
+
+Autres marchés: Seattle, Oregon, LA, Bali, Phoenix, Dubaï
+
+━━━━━━━━━━━━━━━━━━
+💰 COMMENT INVESTIR
+━━━━━━━━━━━━━━━━━━
+Étape 1: S'inscrire sur e-estate.co
+Étape 2: Buyer > E-Wallet → Déposer des fonds
+Étape 3: Buyer > Real Estate → Choisir une propriété → Acheter
+Étape 4: Signer le contrat électronique
+Étape 5: Voir ses actifs dans Buyer > My Assets
+E-Wallet: 32+ méthodes de paiement, retrait minimum 1 USD
+
+━━━━━━━━━━━━━━━━━━
+👤 DEVENIR AGENT
+━━━━━━━━━━━━━━━━━━
+- Aucune expérience requise
+- Commissions sur ventes: N1: 6%, N2-5: 2%, N6-8: 1%
+- Commissions sur profits: N1: 5%, N2-3: 2%, N4-5: 1%
+- 20 niveaux de bonus agent (jusqu'à 50 000 ETK + 50 000 USD)
+- Abonnement mensuel ou annuel requis
+
+━━━━━━━━━━━━━━━━━━
+🔗 LIENS & RÉSEAUX
+━━━━━━━━━━━━━━━━━━
+- Inscription: https://www.e-estate.co/agent/953277721577
+- Groupe Telegram francophone: https://t.me/+zkUewSnl1mkyODZk
+- Bot Telegram officiel: https://t.me/E_Estate_Assist
+- E-Wallet: https://e-estate.co/account/wallet
+- Propriétés: https://e-estate.co/account/offers
+- Boutique: https://e-estate.shop/collections/all
+- CoinMarketCap: https://coinmarketcap.com/community/profile/e_estate/
+
+━━━━━━━━━━━━━━━━━━
+🎥 VIDÉOS YOUTUBE
+━━━━━━━━━━━━━━━━━━
+Recommande la vidéo la plus pertinente selon la question:
+https://youtu.be/atcTMrq3EhI | https://youtu.be/84ny_LLdvro | https://youtu.be/M7z9Wh6VmOY (FR)
+https://youtu.be/jkov3JgRs3o (EN) | https://youtu.be/YsH2fUCeVuo | https://youtu.be/fiGaLGI1O0o
+https://youtu.be/RBiBwXJJDJ0 | https://youtu.be/SuPnrXkN5qQ | https://youtu.be/Ijz9yr04A5g
+https://youtu.be/EvZ7SYNDkvc | https://youtu.be/mrtYsDTlk2w | https://youtu.be/qRoZbvH4M20
+https://youtu.be/isRJzBGPplQ | https://youtu.be/ZopXHdV1UEI | https://youtu.be/8ST0InQR2Xk
+https://youtu.be/wOtTSFRTnQw | https://youtu.be/evWOAKJt74Q | https://youtu.be/1zichz2212M
+
+━━━━━━━━━━━━━━━━━━
+📋 INSTRUCTIONS
+━━━━━━━━━━━━━━━━━━
+1. Réponds TOUJOURS en français sauf si l'utilisateur écrit en anglais ou espagnol.
+2. Quand quelqu'un veut investir ou devenir agent: https://www.e-estate.co/agent/953277721577
+3. Pour rejoindre le groupe: https://t.me/+zkUewSnl1mkyODZk
+4. Si tu ne sais pas, invite à contacter info@e-estate.co
+5. Ne promets jamais de rendements garantis — dis "estimés".
+6. Ton prénom est Élise. Tu es l'assistante virtuelle officielle d'E-Estate.
+"""
+
+# ─── SYSTEM PROMPT ANIMATEUR DE GROUPE ───────────────────────────────────────
+GROUP_PROMPT = """Tu es Élise, experte en immobilier, tokenisation et cryptomonnaie, et animatrice du groupe Telegram E-Estate. Tu animes le groupe en français avec énergie et professionnalisme. Tu es un meneur qui inspire, éduque et pousse les membres à réagir et à participer.
+
+Ton rôle dans le groupe:
+- Partager des actualités immobilières mondiales (USA, Dubaï, Europe, Asie)
+- Éduquer sur la tokenisation, l'immobilier digital, la blockchain, les cryptomonnaies
+- Créer des questions de quiz engageantes sur l'immobilier/crypto
+- Lancer des débats et discussions sur l'investissement
+- Motiver et inspirer les membres vers la liberté financière
+- Réagir à l'inactivité avec des messages percutants qui forcent la réaction
+- Agir comme un expert immobilier professionnel
+
+Style: dynamique, expert, motivant, utilise des emojis avec modération, messages courts et percutants.
+Langue: TOUJOURS en français.
+NE JAMAIS mentionner d'autres plateformes concurrentes.
+"""
+
+chat_sessions = {}
+last_group_message = datetime.now()
+quiz_actif = False
+quiz_reponse = ""
+
+# ─── WEBINAIRES ──────────────────────────────────────────────────────────────
+WEBINAIRE_JEUDI_TEXTE = """🏠 *WEBINAIRES E\-ESTATE – IMMOBILIER DIGITAL 2026*
+
+Rejoignez\-nous en direct pour découvrir comment créer votre revenu passif grâce à la blockchain 💸
+
+📅 *CHAQUE JEUDI – Présentation E\-ESTATE*
+
+🕒 *HORAIRES :*
+🇫🇷🇨🇭🇱🇺🇧🇪🇪🇸 21h00 : France, Suisse, Luxembourg, Belgique, Espagne
+🇵🇹🇩🇿🇹🇳🇨🇲🇨🇬 20h00 : Portugal, Algérie, Tunisie, Cameroun, Congo
+🇲🇦🇸🇳🇨🇮🇹🇬 19h00 : Maroc, Sénégal, Côte d'Ivoire, Togo
+🇨🇦 15h00 : Canada \(Montréal\)
+
+🔗 *Google Meet :* https://meet\.google\.com/vqs\-hzfs\-qyy
+CODE : 433 091 362\#
+
+🎙 Conférencier : *Johnny Hoarau*
+👉 Participation *GRATUITE* \— Invitez vos proches \!"""
+
+WEBINAIRE_JEUDI_IMAGE = "https://raw.githubusercontent.com/jhoarau60-max/telegram-bot-project-invest/master/webinaire_jeudi.jpg"
+
+WEBINAIRE_SAMEDI_TEXTE = """🏠 *WEBINAIRES E\-ESTATE – IMMOBILIER DIGITAL 2026*
+
+Rejoignez\-nous en direct pour découvrir comment créer votre revenu passif grâce à la blockchain 💸
+
+📅 *CHAQUE SAMEDI – Présentation E\-ESTATE*
+
+🕒 *HORAIRES :*
+🇫🇷🇨🇭🇱🇺🇧🇪🇪🇸 17h00 : France, Suisse, Luxembourg, Belgique, Espagne
+🇵🇹🇩🇿🇹🇳🇨🇲🇨🇬 16h00 : Portugal, Algérie, Tunisie, Cameroun, Congo
+🇲🇦🇸🇳🇨🇮🇹🇬 15h00 : Maroc, Sénégal, Côte d'Ivoire, Togo
+🇨🇦 11h00 : Canada \(Montréal\)
+
+🔗 *Google Meet :* https://meet\.google\.com/rzy\-bgok\-mwz
+CODE : 433 091 362\#
+
+🎙 Conférencier : *Johnny Hoarau*
+👉 Participation *GRATUITE* \— Invitez vos proches \!"""
+
+WEBINAIRE_SAMEDI_IMAGE = "https://raw.githubusercontent.com/jhoarau60-max/telegram-bot-project-invest/master/webinaire_samedi.jpg"
+
+# ─── SONDAGES ────────────────────────────────────────────────────────────────
+SONDAGES = [
+    {"question": "Quel type d'investissement préférez-vous ?", "options": ["Immobilier tokenisé", "Trading crypto", "Bourse traditionnelle", "Épargne bancaire"]},
+    {"question": "Quel est votre objectif avec E-Estate ?", "options": ["Revenu passif mensuel", "Liberté financière", "Retraite anticipée", "Transmettre à mes enfants"]},
+    {"question": "Dans quelle propriété aimeriez-vous investir ?", "options": ["Desert Villa (Californie)", "Villa Maui (Hawaii)", "Apartments MIA (Miami)", "Projet Dubaï"]},
+    {"question": "Combien investissez-vous par mois ?", "options": ["Moins de 100$", "100$ - 500$", "500$ - 1000$", "Plus de 1000$"]},
+    {"question": "Qu'est-ce qui vous a convaincu d'investir dans l'immobilier tokenisé ?", "options": ["Le rendement", "La sécurité blockchain", "L'accessibilité dès 10$", "La recommandation d'un proche"]},
+    {"question": "Avez-vous déjà entendu parler de l'immobilier tokenisé avant E-Estate ?", "options": ["Oui, j'étais déjà informé", "Un peu", "Non, c'est nouveau pour moi", "J'apprends encore"]},
+]
+
+# ─── HANDLERS PRIVÉS ─────────────────────────────────────────────────────────
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    chat_sessions[user_id] = []
+    welcome = (
+        "👋 Salut ! Moi c'est Élise, l'assistante de John 😊\n\n"
+        "John m'a confié pour répondre à toutes tes questions sur E-Estate — investissement, propriétés, revenus passifs... je connais tout !\n\n"
+        "Pose-moi ta question, je suis là !\n\n"
+        "🔗 S'inscrire : https://www.e-estate.co/agent/953277721577\n"
+        "💬 Rejoindre le groupe : https://t.me/+zkUewSnl1mkyODZk"
+    )
+    await update.message.reply_text(welcome, parse_mode="Markdown")
+
+async def handle_private_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    user_message = update.message.text
+    if user_id not in chat_sessions:
+        chat_sessions[user_id] = []
+    try:
+        await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
+        chat_sessions[user_id].append(types.Content(role="user", parts=[types.Part(text=user_message)]))
+        response = await asyncio.to_thread(
+            client.models.generate_content,
+            model="gemini-2.0-flash",
+            contents=chat_sessions[user_id],
+            config=types.GenerateContentConfig(system_instruction=SYSTEM_PROMPT)
+        )
+        reply = response.text
+        chat_sessions[user_id].append(types.Content(role="model", parts=[types.Part(text=reply)]))
+        try:
+            await update.message.reply_text(reply, parse_mode="Markdown")
+        except Exception:
+            await update.message.reply_text(reply)
+    except Exception as e:
+        logger.error(f"Erreur Gemini privé: {e}")
+        await update.message.reply_text("Désolée, une erreur s'est produite. Veuillez réessayer.")
+
+async def reset(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    chat_sessions[user_id] = []
+    await update.message.reply_text("✅ Conversation réinitialisée. Comment puis-je vous aider ?")
+
+# ─── HANDLER GROUPE ──────────────────────────────────────────────────────────
+async def handle_group_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    global last_group_message, quiz_actif, quiz_reponse
+    if not update.message or not update.message.text:
+        return
+    last_group_message = datetime.now()
+
+    # Vérifier si quelqu'un répond au quiz actif
+    if quiz_actif and quiz_reponse.lower() in update.message.text.lower():
+        user = update.message.from_user
+        quiz_actif = False
+        quiz_reponse = ""
+        await update.message.reply_text(
+            f"🏆 BRAVO {user.first_name} ! Excellente réponse ! Tu es un vrai expert ! 💎🎉"
+        )
+
+# ─── POSTS GROUPE AUTOMATIQUES ───────────────────────────────────────────────
+async def post_actualite_immo(bot):
+    sujets = [
+        "Génère une actualité immobilière mondiale récente et fascinante (marché USA, Dubaï, Europe ou Asie). Présente-la de façon dynamique pour le groupe E-Estate. 3-4 phrases max avec emoji. Termine par une question pour faire réagir le groupe.",
+        "Partage un fait surprenant sur l'immobilier tokenisé dans le monde. Données chiffrées si possible. 3-4 phrases. Termine par une question engageante.",
+        "Donne une info sur l'évolution du marché immobilier mondial cette année. Tendances, prix, opportunités. 3-4 phrases. Interpelle le groupe à la fin.",
+        "Partage une statistique choc sur la richesse immobilière mondiale et pourquoi la tokenisation change tout. 3-4 phrases. Demande l'avis du groupe.",
+    ]
+    try:
+        sujet = random.choice(sujets)
+        response = await asyncio.to_thread(client.models.generate_content, model="gemini-2.0-flash", contents=sujet, config=types.GenerateContentConfig(system_instruction=GROUP_PROMPT))
+        await bot.send_message(GROUP_ID, response.text)
+    except Exception as e:
+        logger.error(f"Erreur actualité immo: {e}")
+
+async def post_formation(bot):
+    sujets = [
+        "Explique en termes simples ce qu'est la tokenisation immobilière pour quelqu'un qui n'y connaît rien. Style pédagogique, court, avec analogie. Termine par une question.",
+        "Explique la différence entre investir dans l'immobilier classique vs l'immobilier tokenisé. Avantages/inconvénients. Court et percutant.",
+        "Qu'est-ce que la blockchain et pourquoi est-ce révolutionnaire pour l'immobilier ? Explication simple, 4-5 phrases, avec émojis.",
+        "Explique ce qu'est un smart contract et comment il protège les investisseurs immobiliers. Simple et engageant.",
+        "Quelle est la différence entre une cryptomonnaie et un token immobilier ? Éducatif et clair pour débutants.",
+        "Pourquoi l'immobilier a toujours été l'investissement préféré des riches ? Et comment E-Estate démocratise cela ? 4-5 phrases dynamiques.",
+    ]
+    try:
+        sujet = random.choice(sujets)
+        response = await asyncio.to_thread(client.models.generate_content, model="gemini-2.0-flash", contents=sujet, config=types.GenerateContentConfig(system_instruction=GROUP_PROMPT))
+        await bot.send_message(GROUP_ID, response.text)
+    except Exception as e:
+        logger.error(f"Erreur formation: {e}")
+
+async def post_quiz(bot):
+    global quiz_actif, quiz_reponse
+    if quiz_actif:
+        return
+    sujets = [
+        "Crée une question de quiz sur l'immobilier tokenisé ou la crypto avec une seule bonne réponse. Format: '🧠 QUIZ: [question] ?' suivi de '💡 Indice: [indice]'. La réponse doit être un mot ou chiffre simple. Donne aussi la réponse après '|||RÉPONSE:' (je l'extrairai, pas affichée).",
+        "Crée une question de quiz sur le marché immobilier mondial avec une seule bonne réponse courte. Format: '🧠 QUIZ: [question]?' + '💡 Indice: [indice]'. Puis '|||RÉPONSE:[réponse]'.",
+        "Crée une question de quiz sur la blockchain ou les cryptomonnaies. Format: '🧠 QUIZ: [question]?' + '💡 Indice: [indice]'. Puis '|||RÉPONSE:[réponse]'.",
+    ]
+    try:
+        sujet = random.choice(sujets)
+        response = await asyncio.to_thread(client.models.generate_content, model="gemini-2.0-flash", contents=sujet, config=types.GenerateContentConfig(system_instruction=GROUP_PROMPT))
+        texte = response.text
+        if "|||RÉPONSE:" in texte:
+            parties = texte.split("|||RÉPONSE:")
+            message = parties[0].strip()
+            quiz_reponse = parties[1].strip().lower()
+            quiz_actif = True
+            await bot.send_message(GROUP_ID, message + "\n\n🏆 Le premier qui répond correctement gagne le titre d'Expert du jour !")
+        else:
+            await bot.send_message(GROUP_ID, texte)
+    except Exception as e:
+        logger.error(f"Erreur quiz: {e}")
+
+async def post_sondage(bot):
+    sondage = random.choice(SONDAGES)
+    try:
+        await bot.send_poll(
+            chat_id=GROUP_ID,
+            question=sondage["question"],
+            options=sondage["options"],
+            is_anonymous=False
+        )
+    except Exception as e:
+        logger.error(f"Erreur sondage: {e}")
+
+async def post_motivation(bot):
+    sujets = [
+        "Écris un message de motivation puissant pour des investisseurs en immobilier tokenisé. Court, percutant, inspire l'action. Termine par un appel à l'action.",
+        "Écris un message inspirant sur la liberté financière et l'immobilier digital. Réel, humain, motivant. Pousse les gens à agir maintenant.",
+        "Écris un message de mindset sur pourquoi les riches investissent dans l'immobilier et comment tout le monde peut le faire maintenant grâce à la tokenisation.",
+    ]
+    try:
+        sujet = random.choice(sujets)
+        response = await asyncio.to_thread(client.models.generate_content, model="gemini-2.0-flash", contents=sujet, config=types.GenerateContentConfig(system_instruction=GROUP_PROMPT))
+        await bot.send_message(GROUP_ID, response.text)
+    except Exception as e:
+        logger.error(f"Erreur motivation: {e}")
+
+async def check_inactivite_groupe(bot):
+    global last_group_message
+    now = datetime.now()
+    heures_inactif = (now - last_group_message).total_seconds() / 3600
+    if heures_inactif >= 3:
+        messages_relance = [
+            "Génère un message percutant pour relancer l'activité d'un groupe Telegram immobilier qui est silencieux depuis quelques heures. Pose une question ouverte provocante sur l'investissement ou l'immobilier. Pousse les gens à réagir.",
+            "Le groupe est silencieux. Écris un message choc avec une statistique immobilière surprenante qui va forcer les gens à réagir et commenter.",
+            "Écris un défi pour les membres du groupe: une question sur leur situation financière actuelle vs leur objectif, avec un appel à partager leur réponse.",
+        ]
+        try:
+            msg = random.choice(messages_relance)
+            response = await asyncio.to_thread(client.models.generate_content, model="gemini-2.0-flash", contents=msg, config=types.GenerateContentConfig(system_instruction=GROUP_PROMPT))
+            await bot.send_message(GROUP_ID, response.text)
+            last_group_message = now
+        except Exception as e:
+            logger.error(f"Erreur relance: {e}")
+
+# ─── WEBINAIRES ──────────────────────────────────────────────────────────────
+async def post_webinaire_jeudi(bot):
+    try:
+        await bot.send_photo(GROUP_ID, photo=WEBINAIRE_JEUDI_IMAGE, caption=WEBINAIRE_JEUDI_TEXTE, parse_mode="MarkdownV2")
+    except Exception as e:
+        logger.error(f"Erreur webinaire jeudi: {e}")
+
+async def post_rappel_jeudi_matin(bot):
+    try:
+        await bot.send_message(GROUP_ID,
+            "⏰ *RAPPEL — Webinaire E\-ESTATE ce soir à 21h00 \!*\n\n"
+            "🏠 Ne manque pas le Webinaire Immobilier Digital ce soir \!\n"
+            "🔗 https://meet\.google\.com/vqs\-hzfs\-qyy\n"
+            "CODE : 433 091 362\#\n\n"
+            "👉 Participation gratuite \— Invite tes proches \!",
+            parse_mode="MarkdownV2")
+    except Exception as e:
+        logger.error(f"Erreur rappel jeudi matin: {e}")
+
+async def post_rappel_jeudi_soir(bot):
+    try:
+        await bot.send_message(GROUP_ID,
+            "🔥 *DANS 1 HEURE — Webinaire E\-ESTATE à 21h00 \!*\n\n"
+            "⚡ C'est ce soir \! Le Webinaire commence dans 1 heure \!\n\n"
+            "🔗 https://meet\.google\.com/vqs\-hzfs\-qyy\n"
+            "CODE : 433 091 362\#\n\n"
+            "🏠 Créez votre revenu passif avec l'immobilier digital \!",
+            parse_mode="MarkdownV2")
+    except Exception as e:
+        logger.error(f"Erreur rappel jeudi soir: {e}")
+
+async def post_webinaire_samedi(bot):
+    try:
+        await bot.send_photo(GROUP_ID, photo=WEBINAIRE_SAMEDI_IMAGE, caption=WEBINAIRE_SAMEDI_TEXTE, parse_mode="MarkdownV2")
+    except Exception as e:
+        logger.error(f"Erreur webinaire samedi: {e}")
+
+async def post_rappel_samedi_matin(bot):
+    try:
+        await bot.send_message(GROUP_ID,
+            "⏰ *RAPPEL — Webinaire E\-ESTATE ce soir à 17h00 \!*\n\n"
+            "🏠 Ne manque pas le Webinaire Immobilier Digital ce soir \!\n"
+            "🔗 https://meet\.google\.com/rzy\-bgok\-mwz\n"
+            "CODE : 433 091 362\#\n\n"
+            "👉 Participation gratuite \— Invite tes proches \!",
+            parse_mode="MarkdownV2")
+    except Exception as e:
+        logger.error(f"Erreur rappel samedi matin: {e}")
+
+async def post_rappel_samedi_soir(bot):
+    try:
+        await bot.send_message(GROUP_ID,
+            "🔥 *DANS 30 MINUTES — Webinaire E\-ESTATE à 17h00 \!*\n\n"
+            "⚡ Le Webinaire commence dans 30 minutes \!\n\n"
+            "🔗 https://meet\.google\.com/rzy\-bgok\-mwz\n"
+            "CODE : 433 091 362\#\n\n"
+            "🏠 Créez votre revenu passif avec l'immobilier digital \!",
+            parse_mode="MarkdownV2")
+    except Exception as e:
+        logger.error(f"Erreur rappel samedi soir: {e}")
+
+# ─── MAIN ─────────────────────────────────────────────────────────────────────
+def main():
+    app = Application.builder().token(TELEGRAM_TOKEN).build()
+
+    # Chat privé
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("reset", reset))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE, handle_private_message))
+
+    # Groupe
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.GROUPS, handle_group_message))
+
+    async def post_init(application):
+        scheduler = AsyncIOScheduler()
+
+        # Animation groupe — contenu IA
+        scheduler.add_job(post_actualite_immo, 'cron', hour='8,20', minute=0, timezone='Europe/Paris', args=[application.bot])
+        scheduler.add_job(post_formation, 'cron', hour='10,16', minute=30, timezone='Europe/Paris', args=[application.bot])
+        scheduler.add_job(post_quiz, 'cron', hour='12,19', minute=0, timezone='Europe/Paris', args=[application.bot])
+        scheduler.add_job(post_sondage, 'cron', hour=14, minute=0, timezone='Europe/Paris', args=[application.bot])
+        scheduler.add_job(post_motivation, 'cron', hour=7, minute=0, timezone='Europe/Paris', args=[application.bot])
+
+        # Vérification inactivité toutes les 2h
+        scheduler.add_job(check_inactivite_groupe, 'interval', hours=2, args=[application.bot])
+
+        # Webinaires
+        scheduler.add_job(post_webinaire_jeudi, 'cron', day_of_week='wed', hour=10, minute=0, timezone='Europe/Paris', args=[application.bot])
+        scheduler.add_job(post_rappel_jeudi_matin, 'cron', day_of_week='thu', hour=11, minute=0, timezone='Europe/Paris', args=[application.bot])
+        scheduler.add_job(post_rappel_jeudi_soir, 'cron', day_of_week='thu', hour=20, minute=0, timezone='Europe/Paris', args=[application.bot])
+        scheduler.add_job(post_webinaire_samedi, 'cron', day_of_week='fri', hour=10, minute=0, timezone='Europe/Paris', args=[application.bot])
+        scheduler.add_job(post_rappel_samedi_matin, 'cron', day_of_week='sat', hour=11, minute=0, timezone='Europe/Paris', args=[application.bot])
+        scheduler.add_job(post_rappel_samedi_soir, 'cron', day_of_week='sat', hour=16, minute=30, timezone='Europe/Paris', args=[application.bot])
+
+        scheduler.start()
+        logger.info("✅ Scheduler E-Estate démarré !")
+
+    app.post_init = post_init
+    logger.info("✅ Bot E-Estate Élise démarré !")
+    app.run_polling(allowed_updates=Update.ALL_TYPES)
+
+if __name__ == "__main__":
+    main()
