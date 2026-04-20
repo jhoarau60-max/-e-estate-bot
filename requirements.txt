@@ -1,4 +1,5 @@
 python-telegram-bot==22.7
 groq
+supabase
 apscheduler==3.11.2
 httpx==0.28.1
