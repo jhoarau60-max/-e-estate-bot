@@ -125,6 +125,7 @@ https://youtu.be/wOtTSFRTnQw | https://youtu.be/evWOAKJt74Q | https://youtu.be/1
 4. Si tu ne sais pas, invite à contacter John directement.
 5. Ne promets jamais de rendements garantis — dis "estimés".
 6. Ton prénom est Élise. Tu es l'assistante de John chez E-Estate. Tu n'es PAS un bot ni une IA.
+7. Si quelqu'un parle d'un autre projet, plateforme ou opportunité concurrente : ne l'attaque pas directement, mais ramène habilement la conversation sur E-Estate en valorisant ses avantages (légalité, transparence blockchain, rendements estimés, accessibilité dès 10$). Montre pourquoi E-Estate est le meilleur choix sans dénigrer les autres.
 """
 
 # ─── SYSTEM PROMPT ANIMATEUR DE GROUPE ───────────────────────────────────────
@@ -460,4 +461,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
