@@ -1,3 +1,4 @@
+
 import os
 import logging
 import random
@@ -129,20 +130,22 @@ https://youtu.be/wOtTSFRTnQw | https://youtu.be/evWOAKJt74Q | https://youtu.be/1
 """
 
 # ─── SYSTEM PROMPT ANIMATEUR DE GROUPE ───────────────────────────────────────
-GROUP_PROMPT = """Tu es Élise, experte en immobilier, tokenisation et cryptomonnaie, et animatrice du groupe Telegram E-Estate. Tu animes le groupe en français avec énergie et professionnalisme. Tu es un meneur qui inspire, éduque et pousse les membres à réagir et à participer.
+GROUP_PROMPT = """Tu es Élise, membre actif et experte du groupe Telegram E-Estate. Tu fais partie intégrante du groupe — tu n'es pas juste une animatrice, tu ES un membre comme les autres, mais en plus compétente et bienveillante.
 
-Ton rôle dans le groupe:
-- Partager des actualités immobilières mondiales (USA, Dubaï, Europe, Asie)
-- Éduquer sur la tokenisation, l'immobilier digital, la blockchain, les cryptomonnaies
-- Créer des questions de quiz engageantes sur l'immobilier/crypto
-- Lancer des débats et discussions sur l'investissement
-- Motiver et inspirer les membres vers la liberté financière
-- Réagir à l'inactivité avec des messages percutants qui forcent la réaction
-- Agir comme un expert immobilier professionnel
+Ton comportement dans le groupe:
+- Tu participes naturellement aux discussions sans qu'on ait besoin de te mentionner
+- Tu donnes des avis constructifs, des suggestions pertinentes, des encouragements sincères
+- Tu réagis aux messages des membres comme une vraie personne le ferait
+- Tu poses des questions pour mieux comprendre et engager la conversation
+- Tu partages des actualités immobilières, des conseils, des infos sur E-Estate
+- Tu es toujours polie, respectueuse, positive et bienveillante
+- Tu motives les membres vers la liberté financière avec bienveillance
+- Si quelqu'un partage une difficulté, tu l'écoutes et tu l'encourages
+- Si quelqu'un parle d'un autre projet, tu ramènes habilement vers E-Estate sans agressivité
 
-Style: dynamique, expert, motivant, utilise des emojis avec modération, messages courts et percutants.
-Langue: TOUJOURS en français.
-NE JAMAIS mentionner d'autres plateformes concurrentes.
+Style: naturel, humain, chaleureux, expert. Parle comme une vraie personne — pas de listes à puces, pas de réponses robotiques. Messages courts et naturels. Emojis avec modération.
+Langue: TOUJOURS en français sauf si quelqu'un écrit en anglais ou espagnol.
+NE JAMAIS mentionner d'autres plateformes concurrentes directement.
 """
 
 GROQ_MODEL = "llama-3.3-70b-versatile"
@@ -250,15 +253,42 @@ async def handle_group_message(update: Update, context: ContextTypes.DEFAULT_TYP
     if not update.message or not update.message.text:
         return
     last_group_message = datetime.now()
+    text = update.message.text
+    bot_username = context.bot.username
 
     # Vérifier si quelqu'un répond au quiz actif
-    if quiz_actif and quiz_reponse.lower() in update.message.text.lower():
+    if quiz_actif and quiz_reponse.lower() in text.lower():
         user = update.message.from_user
         quiz_actif = False
         quiz_reponse = ""
         await update.message.reply_text(
             f"🏆 BRAVO {user.first_name} ! Excellente réponse ! Tu es un vrai expert ! 💎🎉"
         )
+        return
+
+    # Répondre si mentionnée, question, ou discussion générale
+    mention = f"@{bot_username}" in text if bot_username else False
+    is_question = text.strip().endswith("?") or any(w in text.lower() for w in ["élise", "elise", "comment", "c'est quoi", "qu'est", "pourquoi", "combien", "peut-on", "peut on"])
+    is_discussion = len(text.split()) >= 3 and random.random() < 0.7
+
+    if mention or is_question or is_discussion:
+        try:
+            await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
+            response = await asyncio.to_thread(
+                groq_client.chat.completions.create,
+                model=GROQ_MODEL,
+                messages=[
+                    {"role": "system", "content": GROUP_PROMPT},
+                    {"role": "user", "content": text}
+                ]
+            )
+            reply = response.choices[0].message.content
+            try:
+                await update.message.reply_text(reply, parse_mode="Markdown")
+            except Exception:
+                await update.message.reply_text(reply)
+        except Exception as e:
+            logger.error(f"Erreur réponse groupe: {e}")
 
 # ─── POSTS GROUPE AUTOMATIQUES ───────────────────────────────────────────────
 async def post_actualite_immo(bot):
