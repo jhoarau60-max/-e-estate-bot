@@ -205,7 +205,7 @@ SONDAGES = [
 # ─── HANDLERS PRIVÉS ─────────────────────────────────────────────────────────
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
-    chat_sessions[user_id] = []
+    chat_sessions[user_id] = model_prive.start_chat(history=[])
     welcome = (
         "👋 Salut ! Moi c'est Élise, l'assistante de John 😊\n\n"
         "John m'a confié pour répondre à toutes tes questions sur E-Estate — investissement, propriétés, revenus passifs... je connais tout !\n\n"
@@ -230,7 +230,7 @@ async def handle_private_message(update: Update, context: ContextTypes.DEFAULT_T
             await update.message.reply_text(reply)
     except Exception as e:
         logger.error(f"Erreur Gemini privé: {e}")
-        await update.message.reply_text("Désolée, une erreur s'est produite. Veuillez réessayer.")
+        await update.message.reply_text(f"DEBUG ERREUR: {str(e)[:300]}")
 
 async def reset(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
@@ -453,4 +453,4 @@ def main():
     app.run_polling(allowed_updates=Update.ALL_TYPES)
 
 if __name__ == "__main__":
-    main()
+    m
