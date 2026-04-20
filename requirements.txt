@@ -1,4 +1,4 @@
-python-telegram-bot==22.7
-google-generativeai==0.8.3
-apscheduler==3.11.2
-httpx==0.28.1
+ python-telegram-bot==22.7
+  google-generativeai
+  apscheduler==3.11.2
+  httpx==0.28.1
