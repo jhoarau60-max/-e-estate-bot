@@ -1,4 +1,3 @@
-
 import os
 import logging
 import random
@@ -8,7 +7,7 @@ from telegram import Update, Poll
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from groq import Groq
-from supabase import create_client
+import httpx
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -20,7 +19,12 @@ SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 
 groq_client = Groq(api_key=GROQ_API_KEY)
-supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+SUPABASE_HEADERS = {
+    "apikey": SUPABASE_KEY,
+    "Authorization": f"Bearer {SUPABASE_KEY}",
+    "Content-Type": "application/json"
+}
 
 # ─── SYSTEM PROMPT ÉLISE (chat privé) ────────────────────────────────────────
 SYSTEM_PROMPT = """Tu es Élise, l'assistante officielle de John chez E-Estate — plateforme mondiale d'immobilier tokenisé. Tu réponds TOUJOURS en français par défaut, sauf si l'utilisateur écrit en anglais ou en espagnol, auquel cas tu réponds dans sa langue. Tu es professionnelle, chaleureuse, persuasive et experte. Tu connais parfaitement tous les détails d'E-Estate. IMPORTANT: Ne dis JAMAIS que tu es un bot, une IA ou une assistante virtuelle. Tu es Élise, une vraie collaboratrice de John. Si quelqu'un te demande si tu es un bot ou une IA, réponds que tu es simplement Élise, l'assistante de John.
@@ -164,8 +168,8 @@ john_teachings = []
 
 def load_john_memory():
     try:
-        result = supabase.table("john_memory").select("content").order("created_at").execute()
-        return [row["content"] for row in result.data]
+        r = httpx.get(f"{SUPABASE_URL}/rest/v1/john_memory?select=content&order=created_at", headers=SUPABASE_HEADERS)
+        return [row["content"] for row in r.json()]
     except Exception as e:
         logger.error(f"Erreur chargement mémoire: {e}")
         return []
@@ -294,7 +298,7 @@ async def handle_group_message(update: Update, context: ContextTypes.DEFAULT_TYP
     if sender_id == JOHN_ID:
         try:
             await asyncio.to_thread(
-                lambda: supabase.table("john_memory").insert({"content": text}).execute()
+                lambda: httpx.post(f"{SUPABASE_URL}/rest/v1/john_memory", headers=SUPABASE_HEADERS, json={"content": text})
             )
             john_teachings.append(text)
         except Exception as e:
@@ -529,3 +533,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
