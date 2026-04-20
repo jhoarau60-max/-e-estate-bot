@@ -1,4 +1,3 @@
-
 import os
 import logging
 import random
@@ -8,6 +7,7 @@ from telegram import Update, Poll
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from groq import Groq
+import google.generativeai as genai
 import httpx
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -20,6 +20,7 @@ SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 
 groq_client = Groq(api_key=GROQ_API_KEY)
+genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
 
 SUPABASE_HEADERS = {
     "apikey": SUPABASE_KEY,
@@ -163,11 +164,13 @@ Ton comportement dans le groupe:
 - Si quelqu'un parle d'un autre projet, tu ramènes habilement vers E-Estate sans agressivité
 
 Style: naturel, humain, chaleureux, expert. Parle comme une vraie personne — pas de listes à puces, pas de réponses robotiques. Messages courts et naturels. Emojis avec modération.
+IMPORTANT: Réponds DIRECTEMENT à la question posée. Pas de discours autour. Si quelqu'un demande un prix, donne le prix. Si quelqu'un demande comment faire, explique comment faire. Sois précise et concise.
 Langue: TOUJOURS en français sauf si quelqu'un écrit en anglais ou espagnol.
 NE JAMAIS mentionner d'autres plateformes concurrentes directement.
 """
 
 GROQ_MODEL = "llama-3.3-70b-versatile"
+GEMINI_MODEL = "gemini-2.0-flash"
 
 JOHN_ID = 7385702412
 john_teachings = []
@@ -241,7 +244,7 @@ SONDAGES = [
 # ─── HANDLERS PRIVÉS ─────────────────────────────────────────────────────────
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
-    chat_sessions[user_id] = [{"role": "system", "content": SYSTEM_PROMPT}]
+    chat_sessions[user_id] = genai.GenerativeModel(model_name=GEMINI_MODEL, system_instruction=SYSTEM_PROMPT).start_chat(history=[])
     welcome = (
         "👋 Salut ! Moi c'est Élise, l'assistante de John 😊\n\n"
         "John m'a confié pour répondre à toutes tes questions sur E-Estate — investissement, propriétés, revenus passifs... je connais tout !\n\n"
@@ -255,28 +258,30 @@ async def handle_private_message(update: Update, context: ContextTypes.DEFAULT_T
     user_id = update.effective_user.id
     user_message = update.message.text
     if user_id not in chat_sessions:
-        chat_sessions[user_id] = [{"role": "system", "content": SYSTEM_PROMPT}]
+        chat_sessions[user_id] = genai.GenerativeModel(model_name=GEMINI_MODEL, system_instruction=SYSTEM_PROMPT).start_chat(history=[])
+    if user_id == JOHN_ID:
+        try:
+            await asyncio.to_thread(
+                lambda: httpx.post(f"{SUPABASE_URL}/rest/v1/john_memory", headers=SUPABASE_HEADERS, json={"content": f"[Formation privée] {user_message}"})
+            )
+            john_teachings.append(f"[Formation privée] {user_message}")
+        except Exception as e:
+            logger.error(f"Erreur sauvegarde mémoire privée: {e}")
     try:
         await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
-        chat_sessions[user_id].append({"role": "user", "content": user_message})
-        response = await asyncio.to_thread(
-            groq_client.chat.completions.create,
-            model=GROQ_MODEL,
-            messages=chat_sessions[user_id]
-        )
-        reply = response.choices[0].message.content
-        chat_sessions[user_id].append({"role": "assistant", "content": reply})
+        response = await asyncio.to_thread(chat_sessions[user_id].send_message, user_message)
+        reply = response.text
         try:
             await update.message.reply_text(reply, parse_mode="Markdown")
         except Exception:
             await update.message.reply_text(reply)
     except Exception as e:
-        logger.error(f"Erreur Groq privé: {e}")
+        logger.error(f"Erreur Gemini privé: {e}")
         await update.message.reply_text(f"DEBUG ERREUR: {str(e)[:300]}")
 
 async def reset(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
-    chat_sessions[user_id] = [{"role": "system", "content": SYSTEM_PROMPT}]
+    chat_sessions[user_id] = genai.GenerativeModel(model_name=GEMINI_MODEL, system_instruction=SYSTEM_PROMPT).start_chat(history=[])
     await update.message.reply_text("✅ Conversation réinitialisée. Comment puis-je vous aider ?")
 
 # ─── HANDLER GROUPE ──────────────────────────────────────────────────────────
@@ -288,7 +293,6 @@ async def handle_group_message(update: Update, context: ContextTypes.DEFAULT_TYP
     text = update.message.text
     bot_username = context.bot.username
 
-    # Vérifier si quelqu'un répond au quiz actif
     if quiz_actif and quiz_reponse.lower() in text.lower():
         user = update.message.from_user
         quiz_actif = False
@@ -300,7 +304,6 @@ async def handle_group_message(update: Update, context: ContextTypes.DEFAULT_TYP
 
     sender_id = update.message.from_user.id
 
-    # Si c'est John qui parle, enregistrer ses messages pour former Élise
     if sender_id == JOHN_ID:
         try:
             await asyncio.to_thread(
@@ -310,7 +313,6 @@ async def handle_group_message(update: Update, context: ContextTypes.DEFAULT_TYP
         except Exception as e:
             logger.error(f"Erreur sauvegarde Supabase: {e}")
 
-    # Répondre si mentionnée, question, ou discussion générale
     mention = f"@{bot_username}" in text if bot_username else False
     is_question = text.strip().endswith("?") or any(w in text.lower() for w in ["élise", "elise", "comment", "c'est quoi", "qu'est", "pourquoi", "combien", "peut-on", "peut on"])
     is_discussion = len(text.split()) >= 3 and random.random() < 0.7
@@ -321,15 +323,9 @@ async def handle_group_message(update: Update, context: ContextTypes.DEFAULT_TYP
             john_context = ""
             if john_teachings:
                 john_context = "\n\nEnseignements récents de John (ton formateur) à intégrer dans tes réponses:\n" + "\n".join(f"- {t}" for t in john_teachings[-10:])
-            response = await asyncio.to_thread(
-                groq_client.chat.completions.create,
-                model=GROQ_MODEL,
-                messages=[
-                    {"role": "system", "content": GROUP_PROMPT + john_context},
-                    {"role": "user", "content": text}
-                ]
-            )
-            reply = response.choices[0].message.content
+            groupe_model = genai.GenerativeModel(model_name=GEMINI_MODEL, system_instruction=GROUP_PROMPT + john_context)
+            response = await asyncio.to_thread(groupe_model.generate_content, text)
+            reply = response.text
             try:
                 await update.message.reply_text(reply, parse_mode="Markdown")
             except Exception:
@@ -347,8 +343,9 @@ async def post_actualite_immo(bot):
     ]
     try:
         sujet = random.choice(sujets)
-        response = await asyncio.to_thread(groq_client.chat.completions.create, model=GROQ_MODEL, messages=[{"role": "system", "content": GROUP_PROMPT}, {"role": "user", "content": sujet}])
-        await bot.send_message(GROUP_ID, response.choices[0].message.content)
+        m = genai.GenerativeModel(model_name=GEMINI_MODEL, system_instruction=GROUP_PROMPT)
+        response = await asyncio.to_thread(m.generate_content, sujet)
+        await bot.send_message(GROUP_ID, response.text)
     except Exception as e:
         logger.error(f"Erreur actualité immo: {e}")
 
@@ -363,8 +360,9 @@ async def post_formation(bot):
     ]
     try:
         sujet = random.choice(sujets)
-        response = await asyncio.to_thread(groq_client.chat.completions.create, model=GROQ_MODEL, messages=[{"role": "system", "content": GROUP_PROMPT}, {"role": "user", "content": sujet}])
-        await bot.send_message(GROUP_ID, response.choices[0].message.content)
+        m = genai.GenerativeModel(model_name=GEMINI_MODEL, system_instruction=GROUP_PROMPT)
+        response = await asyncio.to_thread(m.generate_content, sujet)
+        await bot.send_message(GROUP_ID, response.text)
     except Exception as e:
         logger.error(f"Erreur formation: {e}")
 
@@ -379,8 +377,9 @@ async def post_quiz(bot):
     ]
     try:
         sujet = random.choice(sujets)
-        response = await asyncio.to_thread(groq_client.chat.completions.create, model=GROQ_MODEL, messages=[{"role": "system", "content": GROUP_PROMPT}, {"role": "user", "content": sujet}])
-        texte = response.choices[0].message.content
+        m = genai.GenerativeModel(model_name=GEMINI_MODEL, system_instruction=GROUP_PROMPT)
+        response = await asyncio.to_thread(m.generate_content, sujet)
+        texte = response.text
         if "|||RÉPONSE:" in texte:
             parties = texte.split("|||RÉPONSE:")
             message = parties[0].strip()
@@ -412,8 +411,9 @@ async def post_motivation(bot):
     ]
     try:
         sujet = random.choice(sujets)
-        response = await asyncio.to_thread(groq_client.chat.completions.create, model=GROQ_MODEL, messages=[{"role": "system", "content": GROUP_PROMPT}, {"role": "user", "content": sujet}])
-        await bot.send_message(GROUP_ID, response.choices[0].message.content)
+        m = genai.GenerativeModel(model_name=GEMINI_MODEL, system_instruction=GROUP_PROMPT)
+        response = await asyncio.to_thread(m.generate_content, sujet)
+        await bot.send_message(GROUP_ID, response.text)
     except Exception as e:
         logger.error(f"Erreur motivation: {e}")
 
@@ -429,8 +429,9 @@ async def check_inactivite_groupe(bot):
         ]
         try:
             msg = random.choice(messages_relance)
-            response = await asyncio.to_thread(groq_client.chat.completions.create, model=GROQ_MODEL, messages=[{"role": "system", "content": GROUP_PROMPT}, {"role": "user", "content": msg}])
-            await bot.send_message(GROUP_ID, response.choices[0].message.content)
+            m = genai.GenerativeModel(model_name=GEMINI_MODEL, system_instruction=GROUP_PROMPT)
+            response = await asyncio.to_thread(m.generate_content, msg)
+            await bot.send_message(GROUP_ID, response.text)
             last_group_message = now
         except Exception as e:
             logger.error(f"Erreur relance: {e}")
@@ -445,11 +446,11 @@ async def post_webinaire_jeudi(bot):
 async def post_rappel_jeudi_matin(bot):
     try:
         await bot.send_message(GROUP_ID,
-            "⏰ *RAPPEL — Webinaire E\-ESTATE ce soir à 21h00 \!*\n\n"
-            "🏠 Ne manque pas le Webinaire Immobilier Digital ce soir \!\n"
-            "🔗 https://meet\.google\.com/vqs\-hzfs\-qyy\n"
-            "CODE : 433 091 362\#\n\n"
-            "👉 Participation gratuite \— Invite tes proches \!",
+            "⏰ *RAPPEL — Webinaire E\\-ESTATE ce soir à 21h00 \\!*\n\n"
+            "🏠 Ne manque pas le Webinaire Immobilier Digital ce soir \\!\n"
+            "🔗 https://meet\\.google\\.com/vqs\\-hzfs\\-qyy\n"
+            "CODE : 433 091 362\\#\n\n"
+            "👉 Participation gratuite \\— Invite tes proches \\!",
             parse_mode="MarkdownV2")
     except Exception as e:
         logger.error(f"Erreur rappel jeudi matin: {e}")
@@ -457,11 +458,11 @@ async def post_rappel_jeudi_matin(bot):
 async def post_rappel_jeudi_soir(bot):
     try:
         await bot.send_message(GROUP_ID,
-            "🔥 *DANS 1 HEURE — Webinaire E\-ESTATE à 21h00 \!*\n\n"
-            "⚡ C'est ce soir \! Le Webinaire commence dans 1 heure \!\n\n"
-            "🔗 https://meet\.google\.com/vqs\-hzfs\-qyy\n"
-            "CODE : 433 091 362\#\n\n"
-            "🏠 Créez votre revenu passif avec l'immobilier digital \!",
+            "🔥 *DANS 1 HEURE — Webinaire E\\-ESTATE à 21h00 \\!*\n\n"
+            "⚡ C'est ce soir \\! Le Webinaire commence dans 1 heure \\!\n\n"
+            "🔗 https://meet\\.google\\.com/vqs\\-hzfs\\-qyy\n"
+            "CODE : 433 091 362\\#\n\n"
+            "🏠 Créez votre revenu passif avec l'immobilier digital \\!",
             parse_mode="MarkdownV2")
     except Exception as e:
         logger.error(f"Erreur rappel jeudi soir: {e}")
@@ -475,11 +476,11 @@ async def post_webinaire_samedi(bot):
 async def post_rappel_samedi_matin(bot):
     try:
         await bot.send_message(GROUP_ID,
-            "⏰ *RAPPEL — Webinaire E\-ESTATE ce soir à 17h00 \!*\n\n"
-            "🏠 Ne manque pas le Webinaire Immobilier Digital ce soir \!\n"
-            "🔗 https://meet\.google\.com/rzy\-bgok\-mwz\n"
-            "CODE : 433 091 362\#\n\n"
-            "👉 Participation gratuite \— Invite tes proches \!",
+            "⏰ *RAPPEL — Webinaire E\\-ESTATE ce soir à 17h00 \\!*\n\n"
+            "🏠 Ne manque pas le Webinaire Immobilier Digital ce soir \\!\n"
+            "🔗 https://meet\\.google\\.com/rzy\\-bgok\\-mwz\n"
+            "CODE : 433 091 362\\#\n\n"
+            "👉 Participation gratuite \\— Invite tes proches \\!",
             parse_mode="MarkdownV2")
     except Exception as e:
         logger.error(f"Erreur rappel samedi matin: {e}")
@@ -487,11 +488,11 @@ async def post_rappel_samedi_matin(bot):
 async def post_rappel_samedi_soir(bot):
     try:
         await bot.send_message(GROUP_ID,
-            "🔥 *DANS 30 MINUTES — Webinaire E\-ESTATE à 17h00 \!*\n\n"
-            "⚡ Le Webinaire commence dans 30 minutes \!\n\n"
-            "🔗 https://meet\.google\.com/rzy\-bgok\-mwz\n"
-            "CODE : 433 091 362\#\n\n"
-            "🏠 Créez votre revenu passif avec l'immobilier digital \!",
+            "🔥 *DANS 30 MINUTES — Webinaire E\\-ESTATE à 17h00 \\!*\n\n"
+            "⚡ Le Webinaire commence dans 30 minutes \\!\n\n"
+            "🔗 https://meet\\.google\\.com/rzy\\-bgok\\-mwz\n"
+            "CODE : 433 091 362\\#\n\n"
+            "🏠 Créez votre revenu passif avec l'immobilier digital \\!",
             parse_mode="MarkdownV2")
     except Exception as e:
         logger.error(f"Erreur rappel samedi soir: {e}")
@@ -500,28 +501,21 @@ async def post_rappel_samedi_soir(bot):
 def main():
     app = Application.builder().token(TELEGRAM_TOKEN).build()
 
-    # Chat privé
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("reset", reset))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE, handle_private_message))
-
-    # Groupe
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.GROUPS, handle_group_message))
 
     async def post_init(application):
         scheduler = AsyncIOScheduler()
 
-        # Animation groupe — contenu IA
         scheduler.add_job(post_actualite_immo, 'cron', hour='8,20', minute=0, timezone='Europe/Paris', args=[application.bot])
         scheduler.add_job(post_formation, 'cron', hour='10,16', minute=30, timezone='Europe/Paris', args=[application.bot])
         scheduler.add_job(post_quiz, 'cron', hour='12,19', minute=0, timezone='Europe/Paris', args=[application.bot])
         scheduler.add_job(post_sondage, 'cron', hour=14, minute=0, timezone='Europe/Paris', args=[application.bot])
         scheduler.add_job(post_motivation, 'cron', hour=7, minute=0, timezone='Europe/Paris', args=[application.bot])
-
-        # Vérification inactivité toutes les 2h
         scheduler.add_job(check_inactivite_groupe, 'interval', hours=2, args=[application.bot])
 
-        # Webinaires
         scheduler.add_job(post_webinaire_jeudi, 'cron', day_of_week='wed', hour=10, minute=0, timezone='Europe/Paris', args=[application.bot])
         scheduler.add_job(post_rappel_jeudi_matin, 'cron', day_of_week='thu', hour=11, minute=0, timezone='Europe/Paris', args=[application.bot])
         scheduler.add_job(post_rappel_jeudi_soir, 'cron', day_of_week='thu', hour=20, minute=0, timezone='Europe/Paris', args=[application.bot])
@@ -538,3 +532,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
