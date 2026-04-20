@@ -1,13 +1,11 @@
 import os
 import logging
 import random
-import asyncio
 from datetime import datetime
 from telegram import Update, Poll
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from google import genai
-from google.genai import types
+import google.generativeai as genai
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -16,7 +14,7 @@ TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 GROUP_ID = int(os.environ.get("GROUP_ID", "0"))
 
-client = genai.Client(api_key=GEMINI_API_KEY)
+genai.configure(api_key=GEMINI_API_KEY)
 
 # ─── SYSTEM PROMPT ÉLISE (chat privé) ────────────────────────────────────────
 SYSTEM_PROMPT = """Tu es Élise, l'assistante virtuelle officielle d'E-Estate — plateforme mondiale d'immobilier tokenisé. Tu réponds TOUJOURS en français par défaut, sauf si l'utilisateur écrit en anglais ou en espagnol, auquel cas tu réponds dans sa langue. Tu es professionnelle, chaleureuse, persuasive et experte. Tu connais parfaitement tous les détails d'E-Estate.
@@ -145,6 +143,9 @@ Langue: TOUJOURS en français.
 NE JAMAIS mentionner d'autres plateformes concurrentes.
 """
 
+model_prive = genai.GenerativeModel(model_name="gemini-2.0-flash", system_instruction=SYSTEM_PROMPT)
+model_groupe = genai.GenerativeModel(model_name="gemini-2.0-flash", system_instruction=GROUP_PROMPT)
+
 chat_sessions = {}
 last_group_message = datetime.now()
 quiz_actif = False
@@ -218,18 +219,11 @@ async def handle_private_message(update: Update, context: ContextTypes.DEFAULT_T
     user_id = update.effective_user.id
     user_message = update.message.text
     if user_id not in chat_sessions:
-        chat_sessions[user_id] = []
+        chat_sessions[user_id] = model_prive.start_chat(history=[])
     try:
         await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
-        chat_sessions[user_id].append(types.Content(role="user", parts=[types.Part(text=user_message)]))
-        response = await asyncio.to_thread(
-            client.models.generate_content,
-            model="gemini-2.0-flash",
-            contents=chat_sessions[user_id],
-            config=types.GenerateContentConfig(system_instruction=SYSTEM_PROMPT)
-        )
+        response = chat_sessions[user_id].send_message(user_message)
         reply = response.text
-        chat_sessions[user_id].append(types.Content(role="model", parts=[types.Part(text=reply)]))
         try:
             await update.message.reply_text(reply, parse_mode="Markdown")
         except Exception:
@@ -240,7 +234,7 @@ async def handle_private_message(update: Update, context: ContextTypes.DEFAULT_T
 
 async def reset(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
-    chat_sessions[user_id] = []
+    chat_sessions[user_id] = model_prive.start_chat(history=[])
     await update.message.reply_text("✅ Conversation réinitialisée. Comment puis-je vous aider ?")
 
 # ─── HANDLER GROUPE ──────────────────────────────────────────────────────────
@@ -269,7 +263,7 @@ async def post_actualite_immo(bot):
     ]
     try:
         sujet = random.choice(sujets)
-        response = await asyncio.to_thread(client.models.generate_content, model="gemini-2.0-flash", contents=sujet, config=types.GenerateContentConfig(system_instruction=GROUP_PROMPT))
+        response = model_groupe.generate_content(sujet)
         await bot.send_message(GROUP_ID, response.text)
     except Exception as e:
         logger.error(f"Erreur actualité immo: {e}")
@@ -285,7 +279,7 @@ async def post_formation(bot):
     ]
     try:
         sujet = random.choice(sujets)
-        response = await asyncio.to_thread(client.models.generate_content, model="gemini-2.0-flash", contents=sujet, config=types.GenerateContentConfig(system_instruction=GROUP_PROMPT))
+        response = model_groupe.generate_content(sujet)
         await bot.send_message(GROUP_ID, response.text)
     except Exception as e:
         logger.error(f"Erreur formation: {e}")
@@ -301,7 +295,7 @@ async def post_quiz(bot):
     ]
     try:
         sujet = random.choice(sujets)
-        response = await asyncio.to_thread(client.models.generate_content, model="gemini-2.0-flash", contents=sujet, config=types.GenerateContentConfig(system_instruction=GROUP_PROMPT))
+        response = model_groupe.generate_content(sujet)
         texte = response.text
         if "|||RÉPONSE:" in texte:
             parties = texte.split("|||RÉPONSE:")
@@ -334,7 +328,7 @@ async def post_motivation(bot):
     ]
     try:
         sujet = random.choice(sujets)
-        response = await asyncio.to_thread(client.models.generate_content, model="gemini-2.0-flash", contents=sujet, config=types.GenerateContentConfig(system_instruction=GROUP_PROMPT))
+        response = model_groupe.generate_content(sujet)
         await bot.send_message(GROUP_ID, response.text)
     except Exception as e:
         logger.error(f"Erreur motivation: {e}")
@@ -351,7 +345,7 @@ async def check_inactivite_groupe(bot):
         ]
         try:
             msg = random.choice(messages_relance)
-            response = await asyncio.to_thread(client.models.generate_content, model="gemini-2.0-flash", contents=msg, config=types.GenerateContentConfig(system_instruction=GROUP_PROMPT))
+            response = model_groupe.generate_content(msg)
             await bot.send_message(GROUP_ID, response.text)
             last_group_message = now
         except Exception as e:
