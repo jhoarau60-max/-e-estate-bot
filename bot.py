@@ -310,6 +310,39 @@ SONDAGES = [
     {"question": "Avez-vous déjà entendu parler de l'immobilier tokenisé avant E-Estate ?", "options": ["Oui, j'étais déjà informé", "Un peu", "Non, c'est nouveau pour moi", "J'apprends encore"]},
 ]
 
+# ─── DÉTECTION DE LANGUE ─────────────────────────────────────────────────────
+def detect_language(text):
+    t = text.lower().strip()
+    words = t.split()
+    if any('؀' <= c <= 'ۿ' for c in text):
+        return 'Arabic'
+    if any('一' <= c <= '鿿' for c in text):
+        return 'Chinese'
+    en = {'the','is','are','was','were','have','has','do','does','and','or','but','in','on','at','to','for','of','a','an','i','you','we','they','it','this','that','with','what','how','when','where','why','who','can','will','would','should','could','hello','hi','good','morning','evening','please','thank','thanks','yes','no','ok','okay','great','nice','well','just','can','do','did','get','got','go','come','know','think','want','need','like','see','make','give','say','tell','here','there','now','very','also','if','so','then','about','from','by','up','out','as'}
+    es = {'hola','gracias','por','que','es','de','la','el','en','con','los','las','un','una','como','para','qué','está','estoy','tengo','tiene','quiero','buenas','buenos','señor','señora','todo','todos','pero','porque','cuando','donde','quien','cual','muy','bien','mal','sí','no','hay','hacer','quiero','puede','pueden','usted','ustedes','nosotros','ellos','ellas'}
+    pt = {'olá','ola','obrigado','obrigada','não','nao','sim','os','as','um','uma','com','para','você','voce','eu','ele','ela','isso','este','esta','aqui','muito','bom','boa','bem','mas','porque','quando','onde','quem','qual','pode','podem','nós','eles','elas','estou','está','tenho','tem','quero','preciso','fazer','ver','saber','falar','dizer'}
+    de = {'ich','bin','du','bist','er','sie','es','ist','wir','sind','ihr','seid','haben','hat','habe','wie','was','wer','wo','warum','wann','ja','nein','gut','bitte','danke','hallo','guten','morgen','abend','nacht','sehr','auch','oder','aber','wenn','dann','noch','schon','doch','immer','nie','hier','dort'}
+    it = {'ciao','buongiorno','buonasera','grazie','prego','sì','no','come','cosa','dove','quando','perché','chi','quale','sono','hai','siete','abbiamo','avete','hanno','voglio','posso','fare','dire','vedere','sapere','molto','bene','male','tutto','tutti','però','perché','quando','se','anche'}
+    en_c = sum(1 for w in words if w in en)
+    es_c = sum(1 for w in words if w in es)
+    pt_c = sum(1 for w in words if w in pt)
+    de_c = sum(1 for w in words if w in de)
+    it_c = sum(1 for w in words if w in it)
+    best = max(en_c, es_c, pt_c, de_c, it_c)
+    if best == 0:
+        return 'French'
+    if best == en_c:
+        return 'English'
+    if best == es_c:
+        return 'Spanish'
+    if best == pt_c:
+        return 'Portuguese'
+    if best == de_c:
+        return 'German'
+    if best == it_c:
+        return 'Italian'
+    return 'French'
+
 # ─── HANDLERS PRIVÉS ─────────────────────────────────────────────────────────
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
@@ -340,7 +373,9 @@ async def handle_private_message(update: Update, context: ContextTypes.DEFAULT_T
             logger.error(f"Erreur sauvegarde mémoire privée: {e}")
         try:
             await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
-            chat_history[user_id].append({"role": "user", "content": user_message})
+            detected = detect_language(user_message)
+            lang_prefix = f"[Respond in {detected} only]\n"
+            chat_history[user_id].append({"role": "user", "content": lang_prefix + user_message})
             response = await asyncio.to_thread(
                 groq_client.chat.completions.create,
                 model=GROQ_MODEL,
@@ -358,7 +393,9 @@ async def handle_private_message(update: Update, context: ContextTypes.DEFAULT_T
         return
     try:
         await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
-        chat_history[user_id].append({"role": "user", "content": user_message})
+        detected = detect_language(user_message)
+        lang_prefix = f"[Respond in {detected} only]\n"
+        chat_history[user_id].append({"role": "user", "content": lang_prefix + user_message})
         response = await asyncio.to_thread(
             groq_client.chat.completions.create,
             model=GROQ_MODEL,
@@ -457,7 +494,9 @@ async def handle_group_message(update: Update, context: ContextTypes.DEFAULT_TYP
             lang_context = "RÈGLE ABSOLUE: Tu dois répondre dans la même langue que le message reçu. Si le message est en anglais → réponds en anglais. Si en portugais → réponds en portugais. Si en espagnol → réponds en espagnol. Si en français → réponds en français. NE JAMAIS répondre dans une autre langue que celle du message.\n\n"
             combined_prompt = lang_context + SYSTEM_PROMPT + "\n\n" + GROUP_PROMPT + john_context + history_context
             messages = [{"role": "system", "content": combined_prompt}]
-            messages.append({"role": "user", "content": text})
+            detected = detect_language(text)
+            lang_prefix = f"[Respond in {detected} only]\n"
+            messages.append({"role": "user", "content": lang_prefix + text})
             response = await asyncio.to_thread(
                 groq_client.chat.completions.create,
                 model=GROQ_MODEL,
