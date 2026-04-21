@@ -340,9 +340,9 @@ def detect_language(text):
     t = text.lower().strip()
     words = t.split()
     if any('؀' <= c <= 'ۿ' for c in text):
-        return 'Arabic'
+        return 'arabe'
     if any('一' <= c <= '鿿' for c in text):
-        return 'Chinese'
+        return 'chinois'
     en = {'the','is','are','was','were','have','has','do','does','and','but','in','on','at','to','for','of','a','an','i','you','we','they','it','this','that','with','what','how','when','where','why','who','can','will','would','should','could','hello','hi','good','morning','evening','please','thank','thanks','yes','ok','okay','great','nice','well','just','did','get','got','go','come','know','think','want','need','like','see','make','give','say','tell','here','there','now','very','also','about','from','by','up','out','as','my','your','our','their','its','am','been','being','had','shall','may','might','must'}
     es = {'hola','gracias','señor','señora','estoy','tengo','tiene','quiero','buenas','buenos','nosotros','ellos','ellas','usted','ustedes','pueden','puede','sí','hay','hacer','cuando','donde','quien','cual'}
     pt = {'olá','ola','obrigado','obrigada','não','nao','você','voce','isso','aqui','estou','preciso','falar','dizer','podem'}
@@ -355,18 +355,18 @@ def detect_language(text):
     it_c = sum(1 for w in words if w in it)
     best = max(en_c, es_c, pt_c, de_c, it_c)
     if best == 0:
-        return 'French'
+        return 'français'
     if best == en_c:
-        return 'English'
+        return 'anglais'
     if best == es_c:
-        return 'Spanish'
+        return 'espagnol'
     if best == pt_c:
-        return 'Portuguese'
+        return 'portugais'
     if best == de_c:
-        return 'German'
+        return 'allemand'
     if best == it_c:
-        return 'Italian'
-    return 'French'
+        return 'italien'
+    return 'français'
 
 # ─── COMMANDES JOHN ──────────────────────────────────────────────────────────
 async def handle_john_commands(update: Update, context: ContextTypes.DEFAULT_TYPE):
