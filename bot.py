@@ -7,7 +7,6 @@ from zoneinfo import ZoneInfo
 from telegram import Update, Poll, ChatPermissions
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from groq import Groq
 import google.generativeai as genai
 import httpx
 
@@ -15,12 +14,10 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 logger = logging.getLogger(__name__)
 
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
-GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 GROUP_ID = int(os.environ.get("GROUP_ID", "0"))
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 
-groq_client = Groq(api_key=GROQ_API_KEY)
 genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
 
 SUPABASE_HEADERS = {
@@ -229,7 +226,7 @@ RÈGLE NUMÉRO 1 — LANGUE: Tu détectes la langue du message reçu et tu répo
 NE JAMAIS mentionner d'autres plateformes concurrentes directement.
 """
 
-GROQ_MODEL = "llama-3.1-8b-instant"
+
 GEMINI_MODEL_NAME = "gemini-2.0-flash"
 
 JOHN_ID = 7385702412
@@ -240,28 +237,16 @@ NIGHT_END = 9
 gemini_chats = {}
 
 async def ask_gemini_group(system_prompt, user_message):
-    try:
-        model = genai.GenerativeModel(model_name=GEMINI_MODEL_NAME, system_instruction=system_prompt)
-        response = await asyncio.to_thread(model.generate_content, user_message)
-        return response.text
-    except Exception as e:
-        logger.error(f"Erreur Gemini groupe: {e}")
-        messages = [{"role": "system", "content": system_prompt}, {"role": "user", "content": user_message}]
-        response = await asyncio.to_thread(groq_client.chat.completions.create, model=GROQ_MODEL, messages=messages)
-        return response.choices[0].message.content
+    model = genai.GenerativeModel(model_name=GEMINI_MODEL_NAME, system_instruction=system_prompt)
+    response = await asyncio.to_thread(model.generate_content, user_message)
+    return response.text
 
 async def ask_gemini_private(user_id, user_message):
-    try:
-        if user_id not in gemini_chats:
-            model = genai.GenerativeModel(model_name=GEMINI_MODEL_NAME, system_instruction=SYSTEM_PROMPT)
-            gemini_chats[user_id] = model.start_chat(history=[])
-        response = await asyncio.to_thread(gemini_chats[user_id].send_message, user_message)
-        return response.text
-    except Exception as e:
-        logger.error(f"Erreur Gemini privé: {e}")
-        messages = [{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": user_message}]
-        response = await asyncio.to_thread(groq_client.chat.completions.create, model=GROQ_MODEL, messages=messages)
-        return response.choices[0].message.content
+    if user_id not in gemini_chats:
+        model = genai.GenerativeModel(model_name=GEMINI_MODEL_NAME, system_instruction=SYSTEM_PROMPT)
+        gemini_chats[user_id] = model.start_chat(history=[])
+    response = await asyncio.to_thread(gemini_chats[user_id].send_message, user_message)
+    return response.text
 
 def is_night_mode():
     h = datetime.now(PARIS_TZ).hour
@@ -474,7 +459,7 @@ async def handle_private_message(update: Update, context: ContextTypes.DEFAULT_T
         except Exception:
             pass
     except Exception as e:
-        logger.error(f"Erreur Groq privé: {e}")
+        logger.error(f"Erreur Gemini privé: {e}")
         await update.message.reply_text(f"DEBUG ERREUR: {str(e)[:300]}")
 
 async def reset(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -581,13 +566,9 @@ async def post_actualite_immo(bot):
         "Partage une statistique choc sur la richesse immobilière mondiale et pourquoi la tokenisation change tout. 3-4 phrases. Demande l'avis du groupe.",
     ]
     try:
-        sujet = random.choice(sujets)
-        response = await asyncio.to_thread(
-            groq_client.chat.completions.create,
-            model=GROQ_MODEL,
-            messages=[{"role": "system", "content": GROUP_PROMPT}, {"role": "user", "content": sujet}]
-        )
-        await bot.send_message(GROUP_ID, response.choices[0].message.content)
+        _m = genai.GenerativeModel(model_name=GEMINI_MODEL_NAME, system_instruction=GROUP_PROMPT)
+        response = await asyncio.to_thread(_m.generate_content, random.choice(sujets))
+        await bot.send_message(GROUP_ID, response.text)
     except Exception as e:
         logger.error(f"Erreur actualité immo: {e}")
 
@@ -601,13 +582,9 @@ async def post_formation(bot):
         "Pourquoi l'immobilier a toujours été l'investissement préféré des riches ? Et comment E-Estate démocratise cela ? 4-5 phrases dynamiques.",
     ]
     try:
-        sujet = random.choice(sujets)
-        response = await asyncio.to_thread(
-            groq_client.chat.completions.create,
-            model=GROQ_MODEL,
-            messages=[{"role": "system", "content": GROUP_PROMPT}, {"role": "user", "content": sujet}]
-        )
-        await bot.send_message(GROUP_ID, response.choices[0].message.content)
+        _m = genai.GenerativeModel(model_name=GEMINI_MODEL_NAME, system_instruction=GROUP_PROMPT)
+        response = await asyncio.to_thread(_m.generate_content, random.choice(sujets))
+        await bot.send_message(GROUP_ID, response.text)
     except Exception as e:
         logger.error(f"Erreur formation: {e}")
 
@@ -621,13 +598,9 @@ async def post_quiz(bot):
         "Crée une question de quiz sur la blockchain ou les cryptomonnaies. Format: '🧠 QUIZ: [question]?' + '💡 Indice: [indice]'. Puis '|||RÉPONSE:[réponse]'.",
     ]
     try:
-        sujet = random.choice(sujets)
-        response = await asyncio.to_thread(
-            groq_client.chat.completions.create,
-            model=GROQ_MODEL,
-            messages=[{"role": "system", "content": GROUP_PROMPT}, {"role": "user", "content": sujet}]
-        )
-        texte = response.choices[0].message.content
+        _m = genai.GenerativeModel(model_name=GEMINI_MODEL_NAME, system_instruction=GROUP_PROMPT)
+        response = await asyncio.to_thread(_m.generate_content, random.choice(sujets))
+        texte = response.text
         if "|||RÉPONSE:" in texte:
             parties = texte.split("|||RÉPONSE:")
             message = parties[0].strip()
@@ -668,13 +641,9 @@ async def post_motivation(bot):
         "Écris un message de mindset sur pourquoi les riches investissent dans l'immobilier et comment tout le monde peut le faire maintenant grâce à la tokenisation.",
     ]
     try:
-        sujet = random.choice(sujets)
-        response = await asyncio.to_thread(
-            groq_client.chat.completions.create,
-            model=GROQ_MODEL,
-            messages=[{"role": "system", "content": GROUP_PROMPT}, {"role": "user", "content": sujet}]
-        )
-        await bot.send_message(GROUP_ID, response.choices[0].message.content)
+        _m = genai.GenerativeModel(model_name=GEMINI_MODEL_NAME, system_instruction=GROUP_PROMPT)
+        response = await asyncio.to_thread(_m.generate_content, random.choice(sujets))
+        await bot.send_message(GROUP_ID, response.text)
     except Exception as e:
         logger.error(f"Erreur motivation: {e}")
 
@@ -689,13 +658,9 @@ async def check_inactivite_groupe(bot):
             "Écris un défi pour les membres du groupe: une question sur leur situation financière actuelle vs leur objectif, avec un appel à partager leur réponse.",
         ]
         try:
-            msg = random.choice(messages_relance)
-            response = await asyncio.to_thread(
-                groq_client.chat.completions.create,
-                model=GROQ_MODEL,
-                messages=[{"role": "system", "content": GROUP_PROMPT}, {"role": "user", "content": msg}]
-            )
-            await bot.send_message(GROUP_ID, response.choices[0].message.content)
+            _m = genai.GenerativeModel(model_name=GEMINI_MODEL_NAME, system_instruction=GROUP_PROMPT)
+            response = await asyncio.to_thread(_m.generate_content, random.choice(messages_relance))
+            await bot.send_message(GROUP_ID, response.text)
             last_group_message = now
         except Exception as e:
             logger.error(f"Erreur relance: {e}")
