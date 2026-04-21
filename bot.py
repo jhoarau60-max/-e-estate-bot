@@ -240,16 +240,28 @@ NIGHT_END = 9
 gemini_chats = {}
 
 async def ask_gemini_group(system_prompt, user_message):
-    model = genai.GenerativeModel(model_name=GEMINI_MODEL_NAME, system_instruction=system_prompt)
-    response = await asyncio.to_thread(model.generate_content, user_message)
-    return response.text
+    try:
+        model = genai.GenerativeModel(model_name=GEMINI_MODEL_NAME, system_instruction=system_prompt)
+        response = await asyncio.to_thread(model.generate_content, user_message)
+        return response.text
+    except Exception as e:
+        logger.error(f"Erreur Gemini groupe: {e}")
+        messages = [{"role": "system", "content": system_prompt}, {"role": "user", "content": user_message}]
+        response = await asyncio.to_thread(groq_client.chat.completions.create, model=GROQ_MODEL, messages=messages)
+        return response.choices[0].message.content
 
 async def ask_gemini_private(user_id, user_message):
-    if user_id not in gemini_chats:
-        model = genai.GenerativeModel(model_name=GEMINI_MODEL_NAME, system_instruction=SYSTEM_PROMPT)
-        gemini_chats[user_id] = model.start_chat(history=[])
-    response = await asyncio.to_thread(gemini_chats[user_id].send_message, user_message)
-    return response.text
+    try:
+        if user_id not in gemini_chats:
+            model = genai.GenerativeModel(model_name=GEMINI_MODEL_NAME, system_instruction=SYSTEM_PROMPT)
+            gemini_chats[user_id] = model.start_chat(history=[])
+        response = await asyncio.to_thread(gemini_chats[user_id].send_message, user_message)
+        return response.text
+    except Exception as e:
+        logger.error(f"Erreur Gemini privé: {e}")
+        messages = [{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": user_message}]
+        response = await asyncio.to_thread(groq_client.chat.completions.create, model=GROQ_MODEL, messages=messages)
+        return response.choices[0].message.content
 
 def is_night_mode():
     h = datetime.now(PARIS_TZ).hour
