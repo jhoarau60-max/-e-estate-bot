@@ -7,7 +7,7 @@ from zoneinfo import ZoneInfo
 from telegram import Update, Poll, ChatPermissions
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-import google.generativeai as genai
+from google import genai
 import httpx
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -18,7 +18,7 @@ GROUP_ID = int(os.environ.get("GROUP_ID", "0"))
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 
-genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
+gemini_client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
 
 SUPABASE_HEADERS = {
     "apikey": SUPABASE_KEY,
@@ -237,14 +237,21 @@ NIGHT_END = 9
 gemini_chats = {}
 
 async def ask_gemini_group(system_prompt, user_message):
-    model = genai.GenerativeModel(model_name=GEMINI_MODEL_NAME, system_instruction=system_prompt)
-    response = await asyncio.to_thread(model.generate_content, user_message)
+    response = await asyncio.to_thread(
+        lambda: gemini_client.models.generate_content(
+            model=GEMINI_MODEL_NAME,
+            contents=user_message,
+            config=genai.types.GenerateContentConfig(system_instruction=system_prompt)
+        )
+    )
     return response.text
 
 async def ask_gemini_private(user_id, user_message):
     if user_id not in gemini_chats:
-        model = genai.GenerativeModel(model_name=GEMINI_MODEL_NAME, system_instruction=SYSTEM_PROMPT)
-        gemini_chats[user_id] = model.start_chat(history=[])
+        gemini_chats[user_id] = gemini_client.chats.create(
+            model=GEMINI_MODEL_NAME,
+            config=genai.types.GenerateContentConfig(system_instruction=SYSTEM_PROMPT)
+        )
     response = await asyncio.to_thread(gemini_chats[user_id].send_message, user_message)
     return response.text
 
@@ -566,8 +573,8 @@ async def post_actualite_immo(bot):
         "Partage une statistique choc sur la richesse immobilière mondiale et pourquoi la tokenisation change tout. 3-4 phrases. Demande l'avis du groupe.",
     ]
     try:
-        _m = genai.GenerativeModel(model_name=GEMINI_MODEL_NAME, system_instruction=GROUP_PROMPT)
-        response = await asyncio.to_thread(_m.generate_content, random.choice(sujets))
+        _sujet = random.choice(sujets)
+        response = await asyncio.to_thread(lambda: gemini_client.models.generate_content(model=GEMINI_MODEL_NAME, contents=_sujet, config=genai.types.GenerateContentConfig(system_instruction=GROUP_PROMPT)))
         await bot.send_message(GROUP_ID, response.text)
     except Exception as e:
         logger.error(f"Erreur actualité immo: {e}")
@@ -582,8 +589,8 @@ async def post_formation(bot):
         "Pourquoi l'immobilier a toujours été l'investissement préféré des riches ? Et comment E-Estate démocratise cela ? 4-5 phrases dynamiques.",
     ]
     try:
-        _m = genai.GenerativeModel(model_name=GEMINI_MODEL_NAME, system_instruction=GROUP_PROMPT)
-        response = await asyncio.to_thread(_m.generate_content, random.choice(sujets))
+        _sujet = random.choice(sujets)
+        response = await asyncio.to_thread(lambda: gemini_client.models.generate_content(model=GEMINI_MODEL_NAME, contents=_sujet, config=genai.types.GenerateContentConfig(system_instruction=GROUP_PROMPT)))
         await bot.send_message(GROUP_ID, response.text)
     except Exception as e:
         logger.error(f"Erreur formation: {e}")
@@ -598,8 +605,8 @@ async def post_quiz(bot):
         "Crée une question de quiz sur la blockchain ou les cryptomonnaies. Format: '🧠 QUIZ: [question]?' + '💡 Indice: [indice]'. Puis '|||RÉPONSE:[réponse]'.",
     ]
     try:
-        _m = genai.GenerativeModel(model_name=GEMINI_MODEL_NAME, system_instruction=GROUP_PROMPT)
-        response = await asyncio.to_thread(_m.generate_content, random.choice(sujets))
+        _sujet = random.choice(sujets)
+        response = await asyncio.to_thread(lambda: gemini_client.models.generate_content(model=GEMINI_MODEL_NAME, contents=_sujet, config=genai.types.GenerateContentConfig(system_instruction=GROUP_PROMPT)))
         texte = response.text
         if "|||RÉPONSE:" in texte:
             parties = texte.split("|||RÉPONSE:")
@@ -641,8 +648,8 @@ async def post_motivation(bot):
         "Écris un message de mindset sur pourquoi les riches investissent dans l'immobilier et comment tout le monde peut le faire maintenant grâce à la tokenisation.",
     ]
     try:
-        _m = genai.GenerativeModel(model_name=GEMINI_MODEL_NAME, system_instruction=GROUP_PROMPT)
-        response = await asyncio.to_thread(_m.generate_content, random.choice(sujets))
+        _sujet = random.choice(sujets)
+        response = await asyncio.to_thread(lambda: gemini_client.models.generate_content(model=GEMINI_MODEL_NAME, contents=_sujet, config=genai.types.GenerateContentConfig(system_instruction=GROUP_PROMPT)))
         await bot.send_message(GROUP_ID, response.text)
     except Exception as e:
         logger.error(f"Erreur motivation: {e}")
@@ -658,8 +665,8 @@ async def check_inactivite_groupe(bot):
             "Écris un défi pour les membres du groupe: une question sur leur situation financière actuelle vs leur objectif, avec un appel à partager leur réponse.",
         ]
         try:
-            _m = genai.GenerativeModel(model_name=GEMINI_MODEL_NAME, system_instruction=GROUP_PROMPT)
-            response = await asyncio.to_thread(_m.generate_content, random.choice(messages_relance))
+            _msg = random.choice(messages_relance)
+            response = await asyncio.to_thread(lambda: gemini_client.models.generate_content(model=GEMINI_MODEL_NAME, contents=_msg, config=genai.types.GenerateContentConfig(system_instruction=GROUP_PROMPT)))
             await bot.send_message(GROUP_ID, response.text)
             last_group_message = now
         except Exception as e:
