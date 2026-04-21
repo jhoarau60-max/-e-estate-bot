@@ -230,13 +230,26 @@ NE JAMAIS mentionner d'autres plateformes concurrentes directement.
 """
 
 GROQ_MODEL = "llama-3.1-8b-instant"
-GEMINI_MODEL = "gemini-2.0-flash"
+GEMINI_MODEL_NAME = "gemini-2.0-flash"
 
 JOHN_ID = 7385702412
 john_teachings = []
 PARIS_TZ = ZoneInfo("Europe/Paris")
 NIGHT_START = 22
 NIGHT_END = 9
+gemini_chats = {}
+
+async def ask_gemini_group(system_prompt, user_message):
+    model = genai.GenerativeModel(model_name=GEMINI_MODEL_NAME, system_instruction=system_prompt)
+    response = await asyncio.to_thread(model.generate_content, user_message)
+    return response.text
+
+async def ask_gemini_private(user_id, user_message):
+    if user_id not in gemini_chats:
+        model = genai.GenerativeModel(model_name=GEMINI_MODEL_NAME, system_instruction=SYSTEM_PROMPT)
+        gemini_chats[user_id] = model.start_chat(history=[])
+    response = await asyncio.to_thread(gemini_chats[user_id].send_message, user_message)
+    return response.text
 
 def is_night_mode():
     h = datetime.now(PARIS_TZ).hour
@@ -421,34 +434,20 @@ async def handle_private_message(update: Update, context: ContextTypes.DEFAULT_T
             await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
             detected = detect_language(user_message)
             lang_prefix = f"[Respond in {detected} only]\n"
-            chat_history[user_id].append({"role": "user", "content": lang_prefix + user_message})
-            response = await asyncio.to_thread(
-                groq_client.chat.completions.create,
-                model=GROQ_MODEL,
-                messages=chat_history[user_id][-20:]
-            )
-            reply = response.choices[0].message.content
-            chat_history[user_id].append({"role": "assistant", "content": reply})
+            reply = await ask_gemini_private(user_id, lang_prefix + user_message)
             try:
                 await update.message.reply_text(reply, parse_mode="Markdown")
             except Exception:
                 await update.message.reply_text(reply)
         except Exception as e:
-            logger.error(f"Erreur Groq privé: {e}")
+            logger.error(f"Erreur Gemini privé: {e}")
             await update.message.reply_text(f"DEBUG ERREUR: {str(e)[:300]}")
         return
     try:
         await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
         detected = detect_language(user_message)
         lang_prefix = f"[Respond in {detected} only]\n"
-        chat_history[user_id].append({"role": "user", "content": lang_prefix + user_message})
-        response = await asyncio.to_thread(
-            groq_client.chat.completions.create,
-            model=GROQ_MODEL,
-            messages=chat_history[user_id][-20:]
-        )
-        reply = response.choices[0].message.content
-        chat_history[user_id].append({"role": "assistant", "content": reply})
+        reply = await ask_gemini_private(user_id, lang_prefix + user_message)
         try:
             await update.message.reply_text(reply, parse_mode="Markdown")
         except Exception:
@@ -537,18 +536,11 @@ async def handle_group_message(update: Update, context: ContextTypes.DEFAULT_TYP
             history_context = ""
             if len(group_history) > 1:
                 history_context = "\n\nContexte récent:\n" + "\n".join(f"- {m['name']}: {m['text']}" for m in group_history[-5:])
-            lang_context = "RÈGLE ABSOLUE: Tu dois répondre dans la même langue que le message reçu. Si le message est en anglais → réponds en anglais. Si en portugais → réponds en portugais. Si en espagnol → réponds en espagnol. Si en français → réponds en français. NE JAMAIS répondre dans une autre langue que celle du message.\n\n"
-            combined_prompt = lang_context + SYSTEM_PROMPT + "\n\n" + GROUP_PROMPT + john_context + history_context
-            messages = [{"role": "system", "content": combined_prompt}]
             detected = detect_language(text)
-            lang_prefix = f"[Respond in {detected} only]\n"
-            messages.append({"role": "user", "content": lang_prefix + text})
-            response = await asyncio.to_thread(
-                groq_client.chat.completions.create,
-                model=GROQ_MODEL,
-                messages=messages
-            )
-            reply = response.choices[0].message.content
+            lang_context = f"LANGUE OBLIGATOIRE: Le message est en {detected}. Tu DOIS répondre en {detected} uniquement.\n\n"
+            combined_prompt = lang_context + SYSTEM_PROMPT + "\n\n" + GROUP_PROMPT + john_context + history_context
+            lang_prefix = f"[{detected} only]\n"
+            reply = await ask_gemini_group(combined_prompt, lang_prefix + text)
             try:
                 await update.message.reply_text(reply, parse_mode="Markdown")
             except Exception:
