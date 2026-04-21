@@ -343,11 +343,11 @@ def detect_language(text):
         return 'Arabic'
     if any('一' <= c <= '鿿' for c in text):
         return 'Chinese'
-    en = {'the','is','are','was','were','have','has','do','does','and','or','but','in','on','at','to','for','of','a','an','i','you','we','they','it','this','that','with','what','how','when','where','why','who','can','will','would','should','could','hello','hi','good','morning','evening','please','thank','thanks','yes','no','ok','okay','great','nice','well','just','can','do','did','get','got','go','come','know','think','want','need','like','see','make','give','say','tell','here','there','now','very','also','if','so','then','about','from','by','up','out','as'}
-    es = {'hola','gracias','por','que','es','de','la','el','en','con','los','las','un','una','como','para','qué','está','estoy','tengo','tiene','quiero','buenas','buenos','señor','señora','todo','todos','pero','porque','cuando','donde','quien','cual','muy','bien','mal','sí','no','hay','hacer','quiero','puede','pueden','usted','ustedes','nosotros','ellos','ellas'}
-    pt = {'olá','ola','obrigado','obrigada','não','nao','sim','os','as','um','uma','com','para','você','voce','eu','ele','ela','isso','este','esta','aqui','muito','bom','boa','bem','mas','porque','quando','onde','quem','qual','pode','podem','nós','eles','elas','estou','está','tenho','tem','quero','preciso','fazer','ver','saber','falar','dizer'}
-    de = {'ich','bin','du','bist','er','sie','es','ist','wir','sind','ihr','seid','haben','hat','habe','wie','was','wer','wo','warum','wann','ja','nein','gut','bitte','danke','hallo','guten','morgen','abend','nacht','sehr','auch','oder','aber','wenn','dann','noch','schon','doch','immer','nie','hier','dort'}
-    it = {'ciao','buongiorno','buonasera','grazie','prego','sì','no','come','cosa','dove','quando','perché','chi','quale','sono','hai','siete','abbiamo','avete','hanno','voglio','posso','fare','dire','vedere','sapere','molto','bene','male','tutto','tutti','però','perché','quando','se','anche'}
+    en = {'the','is','are','was','were','have','has','do','does','and','but','in','on','at','to','for','of','a','an','i','you','we','they','it','this','that','with','what','how','when','where','why','who','can','will','would','should','could','hello','hi','good','morning','evening','please','thank','thanks','yes','ok','okay','great','nice','well','just','did','get','got','go','come','know','think','want','need','like','see','make','give','say','tell','here','there','now','very','also','about','from','by','up','out','as','my','your','our','their','its','am','been','being','had','shall','may','might','must'}
+    es = {'hola','gracias','señor','señora','estoy','tengo','tiene','quiero','buenas','buenos','nosotros','ellos','ellas','usted','ustedes','pueden','puede','sí','hay','hacer','cuando','donde','quien','cual'}
+    pt = {'olá','ola','obrigado','obrigada','não','nao','você','voce','isso','aqui','estou','preciso','falar','dizer','podem'}
+    de = {'ich','bin','du','bist','wir','sind','ihr','seid','haben','hat','habe','wie','was','wer','wo','warum','wann','ja','nein','bitte','danke','hallo','guten','morgen','abend','nacht','sehr','oder','wenn','dann','noch','schon','doch','immer','nie','hier','dort'}
+    it = {'ciao','buongiorno','buonasera','grazie','prego','cosa','perché','siete','abbiamo','avete','hanno','voglio','posso','vedere','sapere','però','anche'}
     en_c = sum(1 for w in words if w in en)
     es_c = sum(1 for w in words if w in es)
     pt_c = sum(1 for w in words if w in pt)
@@ -445,7 +445,7 @@ async def handle_private_message(update: Update, context: ContextTypes.DEFAULT_T
         try:
             await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
             detected = detect_language(user_message)
-            lang_prefix = f"[Respond in {detected} only]\n"
+            lang_prefix = f"RÈGLE ABSOLUE: Réponds UNIQUEMENT en {detected}. Aucune autre langue autorisée.\nMessage: "
             reply = await ask_gemini_private(user_id, lang_prefix + user_message)
             try:
                 await update.message.reply_text(reply, parse_mode="Markdown")
@@ -458,7 +458,7 @@ async def handle_private_message(update: Update, context: ContextTypes.DEFAULT_T
     try:
         await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
         detected = detect_language(user_message)
-        lang_prefix = f"[Respond in {detected} only]\n"
+        lang_prefix = f"RÈGLE ABSOLUE: Réponds UNIQUEMENT en {detected}. Aucune autre langue autorisée.\nMessage: "
         reply = await ask_gemini_private(user_id, lang_prefix + user_message)
         try:
             await update.message.reply_text(reply, parse_mode="Markdown")
@@ -551,7 +551,7 @@ async def handle_group_message(update: Update, context: ContextTypes.DEFAULT_TYP
             detected = detect_language(text)
             lang_context = f"LANGUE OBLIGATOIRE: Le message est en {detected}. Tu DOIS répondre en {detected} uniquement.\n\n"
             combined_prompt = lang_context + SYSTEM_PROMPT + "\n\n" + GROUP_PROMPT + john_context + history_context
-            lang_prefix = f"[{detected} only]\n"
+            lang_prefix = f"RÈGLE ABSOLUE: Réponds UNIQUEMENT en {detected}. Aucune autre langue autorisée.\nMessage: "
             reply = await ask_gemini_group(combined_prompt, lang_prefix + text)
             try:
                 await update.message.reply_text(reply, parse_mode="Markdown")
