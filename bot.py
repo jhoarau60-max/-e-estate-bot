@@ -227,7 +227,7 @@ NE JAMAIS mentionner d'autres plateformes concurrentes directement.
 """
 
 
-GEMINI_MODEL_NAME = "gemini-2.5-flash"
+GEMINI_MODEL_NAME = "gemini-2.0-flash-lite"
 
 JOHN_ID = 7385702412
 john_teachings = []
