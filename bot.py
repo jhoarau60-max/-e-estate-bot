@@ -370,6 +370,19 @@ async def handle_john_commands(update: Update, context: ContextTypes.DEFAULT_TYP
     caption = update.message.caption or ""
     content = text or caption
 
+    if "#information" in content.lower():
+        info = content.replace("#information", "").replace("#Information", "").strip()
+        try:
+            await asyncio.to_thread(
+                lambda: httpx.post(f"{SUPABASE_URL}/rest/v1/john_memory", headers=SUPABASE_HEADERS, json={"content": f"[INFO IMPORTANTE] {info}"})
+            )
+            john_teachings.append(f"[INFO IMPORTANTE] {info}")
+            await update.message.reply_text("✅ Information mémorisée !")
+        except Exception as e:
+            logger.error(f"Erreur sauvegarde Supabase: {e}")
+            await update.message.reply_text(f"❌ Erreur Supabase: {str(e)[:200]}")
+        return True
+
     if content.lower().startswith("#groupe"):
         remainder = content[len("#groupe"):].strip()
         time_match = _re.match(r'^(\d{1,2})[h:](\d{2})\s*', remainder)
