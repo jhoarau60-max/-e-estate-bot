@@ -225,7 +225,7 @@ Ton comportement dans le groupe:
 
 Style: naturel, humain, chaleureux, expert. Parle comme une vraie personne — pas de listes à puces, pas de réponses robotiques. Messages courts et naturels. Emojis avec modération.
 IMPORTANT: Réponds DIRECTEMENT à la question posée. Pas de discours autour. Si quelqu'un demande un prix, donne le prix. Si quelqu'un demande comment faire, explique comment faire. Sois précise et concise.
-Langue: Détecte la langue du message et réponds TOUJOURS dans cette même langue.
+RÈGLE NUMÉRO 1 — LANGUE: Tu détectes la langue du message reçu et tu réponds TOUJOURS et UNIQUEMENT dans cette même langue. Si le message est en français → tu réponds en français. Si en anglais → tu réponds en anglais. Si en espagnol → tu réponds en espagnol. C'est une règle absolue, sans exception.
 NE JAMAIS mentionner d'autres plateformes concurrentes directement.
 """
 
@@ -444,9 +444,7 @@ async def handle_private_message(update: Update, context: ContextTypes.DEFAULT_T
             logger.error(f"Erreur sauvegarde mémoire privée: {e}")
         try:
             await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
-            detected = detect_language(user_message)
-            lang_prefix = f"RÈGLE ABSOLUE: Réponds UNIQUEMENT en {detected}. Aucune autre langue autorisée.\nMessage: "
-            reply = await ask_gemini_private(user_id, lang_prefix + user_message)
+            reply = await ask_gemini_private(user_id, user_message)
             try:
                 await update.message.reply_text(reply, parse_mode="Markdown")
             except Exception:
@@ -457,9 +455,7 @@ async def handle_private_message(update: Update, context: ContextTypes.DEFAULT_T
         return
     try:
         await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
-        detected = detect_language(user_message)
-        lang_prefix = f"RÈGLE ABSOLUE: Réponds UNIQUEMENT en {detected}. Aucune autre langue autorisée.\nMessage: "
-        reply = await ask_gemini_private(user_id, lang_prefix + user_message)
+        reply = await ask_gemini_private(user_id, user_message)
         try:
             await update.message.reply_text(reply, parse_mode="Markdown")
         except Exception:
@@ -548,11 +544,9 @@ async def handle_group_message(update: Update, context: ContextTypes.DEFAULT_TYP
             history_context = ""
             if len(group_history) > 1:
                 history_context = "\n\nContexte récent:\n" + "\n".join(f"- {m['name']}: {m['text']}" for m in group_history[-5:])
-            detected = detect_language(text)
-            lang_context = f"LANGUE OBLIGATOIRE: Le message est en {detected}. Tu DOIS répondre en {detected} uniquement.\n\n"
+            lang_context = "LANGUE: Détecte la langue du message et réponds TOUJOURS dans cette même langue. Jamais une autre langue.\n\n"
             combined_prompt = lang_context + SYSTEM_PROMPT + "\n\n" + GROUP_PROMPT + john_context + history_context
-            lang_prefix = f"RÈGLE ABSOLUE: Réponds UNIQUEMENT en {detected}. Aucune autre langue autorisée.\nMessage: "
-            reply = await ask_gemini_group(combined_prompt, lang_prefix + text)
+            reply = await ask_gemini_group(combined_prompt, text)
             try:
                 await update.message.reply_text(reply, parse_mode="Markdown")
             except Exception:
