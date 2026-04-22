@@ -752,6 +752,15 @@ async def post_rappel_samedi_soir(bot):
     except Exception as e:
         logger.error(f"Erreur rappel samedi soir: {e}")
 
+RAPPEL_ZOOM_ESTATE_TEXTE = "🏠 *Johnny vous attend dans la salle \\!*\n\n⚡ Le webinaire E\\-Estate démarre dans *10 minutes* \\!\n\n🔗 Rejoignez maintenant \\— c'est GRATUIT et peut changer votre vie financière \\! 💎\n\n💪 Soyez là, vous ne le regretterez pas \\!"
+
+async def post_rappel_zoom_estate(bot):
+    try:
+        with open("rappel_zoom_estate.jpg", "rb") as f:
+            await bot.send_photo(GROUP_ID, photo=f, caption=RAPPEL_ZOOM_ESTATE_TEXTE, parse_mode="MarkdownV2")
+    except Exception as e:
+        logger.error(f"Erreur rappel zoom estate: {e}")
+
 # ─── MAIN ─────────────────────────────────────────────────────────────────────
 def main():
     app = Application.builder().token(TELEGRAM_TOKEN).build()
@@ -779,6 +788,10 @@ def main():
         scheduler.add_job(post_webinaire_samedi, 'cron', day_of_week='fri', hour=10, minute=0, timezone='Europe/Paris', args=[application.bot])
         scheduler.add_job(post_rappel_samedi_matin, 'cron', day_of_week='sat', hour=11, minute=0, timezone='Europe/Paris', args=[application.bot])
         scheduler.add_job(post_rappel_samedi_soir, 'cron', day_of_week='sat', hour=16, minute=30, timezone='Europe/Paris', args=[application.bot])
+
+        # Rappels 10 min avant zoom
+        scheduler.add_job(post_rappel_zoom_estate, 'cron', day_of_week='thu', hour=20, minute=50, timezone='Europe/Paris', args=[application.bot])
+        scheduler.add_job(post_rappel_zoom_estate, 'cron', day_of_week='sat', hour=16, minute=50, timezone='Europe/Paris', args=[application.bot])
 
         scheduler.start()
         logger.info("✅ Scheduler E-Estate démarré !")
