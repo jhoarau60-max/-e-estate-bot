@@ -413,15 +413,18 @@ async def handle_john_commands(update: Update, context: ContextTypes.DEFAULT_TYP
             await update.message.reply_text(f"⏰ Message programmé pour {hh:02d}h{mm:02d} (heure Paris) !")
             return True
         msg_text = remainder
-        if update.message.photo:
-            photo = update.message.photo[-1].file_id
-            await context.bot.send_photo(GROUP_ID, photo=photo, caption=msg_text or None)
-        elif update.message.video:
-            video = update.message.video.file_id
-            await context.bot.send_video(GROUP_ID, video=video, caption=msg_text or None)
-        elif msg_text:
-            await context.bot.send_message(GROUP_ID, msg_text)
-        await update.message.reply_text("✅ Publié dans le groupe E-Estate !")
+        try:
+            if update.message.photo:
+                photo = update.message.photo[-1].file_id
+                await context.bot.send_photo(GROUP_ID, photo=photo, caption=msg_text or None)
+            elif update.message.video:
+                video = update.message.video.file_id
+                await context.bot.send_video(GROUP_ID, video=video, caption=msg_text or None)
+            elif msg_text:
+                await context.bot.send_message(GROUP_ID, msg_text)
+            await update.message.reply_text("✅ Publié dans le groupe E-Estate !")
+        except Exception as e:
+            await update.message.reply_text(f"❌ Erreur envoi groupe: {str(e)[:300]}")
         return True
 
     return False
@@ -792,6 +795,7 @@ def main():
     app.add_handler(CommandHandler("reset", reset))
     app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, on_new_member))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE, handle_private_message))
+    app.add_handler(MessageHandler((filters.PHOTO | filters.VIDEO) & filters.ChatType.PRIVATE, handle_private_message))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.GROUPS, handle_group_message))
 
     async def post_init(application):
