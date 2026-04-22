@@ -697,10 +697,8 @@ async def check_inactivite_groupe(bot):
 
 # ─── WEBINAIRES ──────────────────────────────────────────────────────────────
 async def post_webinaire_jeudi(bot):
-    try:
-        await bot.send_photo(GROUP_ID, photo=WEBINAIRE_JEUDI_IMAGE, caption=WEBINAIRE_JEUDI_TEXTE, parse_mode="MarkdownV2")
-    except Exception as e:
-        logger.error(f"Erreur webinaire jeudi: {e}")
+    with open("webinaire_jeudi.jpg", "rb") as f:
+        await bot.send_photo(GROUP_ID, photo=f, caption=WEBINAIRE_JEUDI_TEXTE, parse_mode="MarkdownV2")
 
 async def post_rappel_jeudi_matin(bot):
     try:
@@ -727,10 +725,8 @@ async def post_rappel_jeudi_soir(bot):
         logger.error(f"Erreur rappel jeudi soir: {e}")
 
 async def post_webinaire_samedi(bot):
-    try:
-        await bot.send_photo(GROUP_ID, photo=WEBINAIRE_SAMEDI_IMAGE, caption=WEBINAIRE_SAMEDI_TEXTE, parse_mode="MarkdownV2")
-    except Exception as e:
-        logger.error(f"Erreur webinaire samedi: {e}")
+    with open("webinaire_samedi.jpg", "rb") as f:
+        await bot.send_photo(GROUP_ID, photo=f, caption=WEBINAIRE_SAMEDI_TEXTE, parse_mode="MarkdownV2")
 
 async def post_rappel_samedi_matin(bot):
     try:
