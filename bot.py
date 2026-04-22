@@ -236,6 +236,14 @@ NIGHT_START = 22
 NIGHT_END = 9
 gemini_chats = {}
 
+async def get_john_status():
+    try:
+        async with httpx.AsyncClient(timeout=3) as client:
+            r = await client.get('https://projectinvest.net/api/status')
+            return r.json().get('online', True)
+    except:
+        return True
+
 async def ask_gemini_group(system_prompt, user_message):
     response = await asyncio.to_thread(
         lambda: gemini_client.models.generate_content(
@@ -433,13 +441,24 @@ async def handle_john_commands(update: Update, context: ContextTypes.DEFAULT_TYP
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     chat_history[user_id] = [{"role": "system", "content": SYSTEM_PROMPT}]
-    welcome = (
-        "👋 Salut ! Moi c'est Élise, l'assistante de John 😊\n\n"
-        "John m'a confié pour répondre à toutes tes questions sur E-Estate — investissement, propriétés, revenus passifs... je connais tout !\n\n"
-        "Pose-moi ta question, je suis là !\n\n"
-        "🔗 S'inscrire : https://www.e-estate.co/agent/953277721577\n"
-        "💬 Rejoindre le groupe : https://t.me/+zkUewSnl1mkyODZk"
-    )
+    john_online = await get_john_status()
+    if john_online:
+        welcome = (
+            "👋 Salut ! Moi c'est Élise, l'assistante de John 😊\n\n"
+            "John m'a confié pour répondre à toutes tes questions sur E-Estate — investissement, propriétés, revenus passifs... je connais tout !\n\n"
+            "Tu peux :\n"
+            "🤖 Me poser ta question directement ici\n"
+            "💬 [Parler avec John en direct sur Telegram](https://t.me/Investprojecttttt)\n\n"
+            "🔗 S'inscrire : https://www.e-estate.co/agent/953277721577"
+        )
+    else:
+        welcome = (
+            "👋 Salut ! Moi c'est Élise, l'assistante de John 😊\n\n"
+            "🔴 John est actuellement absent, mais je suis là pour répondre à toutes tes questions sur E-Estate !\n\n"
+            "Pose-moi ta question, je suis là !\n\n"
+            "🔗 S'inscrire : https://www.e-estate.co/agent/953277721577\n"
+            "💬 Rejoindre le groupe : https://t.me/+zkUewSnl1mkyODZk"
+        )
     await update.message.reply_text(welcome, parse_mode="Markdown")
 
 async def handle_private_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
