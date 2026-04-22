@@ -295,7 +295,7 @@ CODE : 433 091 362\#
 🎙 Conférencier : *Johnny Hoarau*
 👉 Participation *GRATUITE* \— Invitez vos proches \!"""
 
-WEBINAIRE_JEUDI_IMAGE = "https://raw.githubusercontent.com/jhoarau60-max/telegram-bot-project-invest/master/webinaire_jeudi.jpg"
+WEBINAIRE_JEUDI_IMAGE = "https://raw.githubusercontent.com/jhoarau60-max/-e-estate-bot/main/webinaire_jeudi.jpg"
 
 WEBINAIRE_SAMEDI_TEXTE = """🏠 *WEBINAIRES E\-ESTATE – IMMOBILIER DIGITAL 2026*
 
@@ -315,7 +315,7 @@ CODE : 433 091 362\#
 🎙 Conférencier : *Johnny Hoarau*
 👉 Participation *GRATUITE* \— Invitez vos proches \!"""
 
-WEBINAIRE_SAMEDI_IMAGE = "https://raw.githubusercontent.com/jhoarau60-max/telegram-bot-project-invest/master/webinaire_samedi.jpg"
+WEBINAIRE_SAMEDI_IMAGE = "https://raw.githubusercontent.com/jhoarau60-max/-e-estate-bot/main/webinaire_samedi.jpg"
 
 # ─── SONDAGES ────────────────────────────────────────────────────────────────
 SONDAGES = [
@@ -369,6 +369,16 @@ async def handle_john_commands(update: Update, context: ContextTypes.DEFAULT_TYP
     text = update.message.text or ""
     caption = update.message.caption or ""
     content = text or caption
+
+    if content.lower().strip() == "#webinaire_jeudi":
+        await post_webinaire_jeudi(context.bot)
+        await update.message.reply_text("✅ Annonce webinaire jeudi publiée !")
+        return True
+
+    if content.lower().strip() == "#webinaire_samedi":
+        await post_webinaire_samedi(context.bot)
+        await update.message.reply_text("✅ Annonce webinaire samedi publiée !")
+        return True
 
     if "#information" in content.lower():
         info = content.replace("#information", "").replace("#Information", "").strip()
