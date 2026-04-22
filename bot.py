@@ -444,15 +444,16 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def handle_private_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
+    if user_id == JOHN_ID:
+        handled = await handle_john_commands(update, context)
+        if handled:
+            return
     user_message = update.message.text
     if not user_message:
         return
     if user_id not in chat_history:
         chat_history[user_id] = [{"role": "system", "content": SYSTEM_PROMPT}]
     if user_id == JOHN_ID:
-        handled = await handle_john_commands(update, context)
-        if handled:
-            return
         try:
             await asyncio.to_thread(
                 lambda: httpx.post(f"{SUPABASE_URL}/rest/v1/john_memory", headers=SUPABASE_HEADERS, json={"content": f"[Formation privée] {user_message}"})
