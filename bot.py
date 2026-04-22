@@ -641,9 +641,12 @@ async def post_quiz(bot):
             quiz_reponse = parties[1].strip().lower()
             quiz_actif = True
             quiz_posted_time = datetime.now()
-            await bot.send_message(GROUP_ID, message + "\n\n🏆 Le premier qui répond correctement gagne le titre d'Expert du jour !\n⏰ La réponse sera révélée dans 1 heure !")
+            caption = message + "\n\n🏆 Le premier qui répond correctement gagne le titre d'Expert du jour !\n⏰ La réponse sera révélée dans 1 heure !"
+            with open("quiz.jpg", "rb") as f:
+                await bot.send_photo(GROUP_ID, photo=f, caption=caption)
         else:
-            await bot.send_message(GROUP_ID, texte)
+            with open("quiz.jpg", "rb") as f:
+                await bot.send_photo(GROUP_ID, photo=f, caption=texte)
     except Exception as e:
         logger.error(f"Erreur quiz: {e}")
 
