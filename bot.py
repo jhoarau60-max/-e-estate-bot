@@ -752,14 +752,37 @@ async def post_rappel_samedi_soir(bot):
     except Exception as e:
         logger.error(f"Erreur rappel samedi soir: {e}")
 
-RAPPEL_ZOOM_ESTATE_TEXTE = "🏠 *Johnny vous attend dans la salle \\!*\n\n⚡ Le webinaire E\\-Estate démarre dans *10 minutes* \\!\n\n🔗 Rejoignez maintenant \\— c'est GRATUIT et peut changer votre vie financière \\! 💎\n\n💪 Soyez là, vous ne le regretterez pas \\!"
+RAPPEL_ZOOM_ESTATE_JEUDI_TEXTE = """🏠 *Johnny vous attend dans la salle \!*
 
-async def post_rappel_zoom_estate(bot):
+⚡ Le webinaire E\-Estate démarre dans *10 minutes* \!
+
+🔗 https://meet\.google\.com/vqs\-hzfs\-qyy
+CODE : 433 091 362\#
+
+💎 Rejoignez maintenant \— c'est GRATUIT \!"""
+
+RAPPEL_ZOOM_ESTATE_SAMEDI_TEXTE = """🏠 *Johnny vous attend dans la salle \!*
+
+⚡ Le webinaire E\-Estate démarre dans *10 minutes* \!
+
+🔗 https://meet\.google\.com/rzy\-bgok\-mwz
+CODE : 433 091 362\#
+
+💎 Rejoignez maintenant \— c'est GRATUIT \!"""
+
+async def post_rappel_zoom_estate_jeudi(bot):
     try:
         with open("rappel_zoom_estate.jpg", "rb") as f:
-            await bot.send_photo(GROUP_ID, photo=f, caption=RAPPEL_ZOOM_ESTATE_TEXTE, parse_mode="MarkdownV2")
+            await bot.send_photo(GROUP_ID, photo=f, caption=RAPPEL_ZOOM_ESTATE_JEUDI_TEXTE, parse_mode="MarkdownV2")
     except Exception as e:
-        logger.error(f"Erreur rappel zoom estate: {e}")
+        logger.error(f"Erreur rappel zoom estate jeudi: {e}")
+
+async def post_rappel_zoom_estate_samedi(bot):
+    try:
+        with open("rappel_zoom_estate.jpg", "rb") as f:
+            await bot.send_photo(GROUP_ID, photo=f, caption=RAPPEL_ZOOM_ESTATE_SAMEDI_TEXTE, parse_mode="MarkdownV2")
+    except Exception as e:
+        logger.error(f"Erreur rappel zoom estate samedi: {e}")
 
 # ─── MAIN ─────────────────────────────────────────────────────────────────────
 def main():
@@ -790,8 +813,8 @@ def main():
         scheduler.add_job(post_rappel_samedi_soir, 'cron', day_of_week='sat', hour=16, minute=30, timezone='Europe/Paris', args=[application.bot])
 
         # Rappels 10 min avant zoom
-        scheduler.add_job(post_rappel_zoom_estate, 'cron', day_of_week='thu', hour=20, minute=50, timezone='Europe/Paris', args=[application.bot])
-        scheduler.add_job(post_rappel_zoom_estate, 'cron', day_of_week='sat', hour=16, minute=50, timezone='Europe/Paris', args=[application.bot])
+        scheduler.add_job(post_rappel_zoom_estate_jeudi, 'cron', day_of_week='thu', hour=20, minute=50, timezone='Europe/Paris', args=[application.bot])
+        scheduler.add_job(post_rappel_zoom_estate_samedi, 'cron', day_of_week='sat', hour=16, minute=50, timezone='Europe/Paris', args=[application.bot])
 
         scheduler.start()
         logger.info("✅ Scheduler E-Estate démarré !")
