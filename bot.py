@@ -798,15 +798,13 @@ CODE : 433 091 362\#
 
 async def post_rappel_zoom_estate_jeudi(bot):
     try:
-        with open("rappel_zoom_estate.jpg", "rb") as f:
-            await bot.send_photo(GROUP_ID, photo=f, caption=RAPPEL_ZOOM_ESTATE_JEUDI_TEXTE, parse_mode="MarkdownV2")
+        await bot.send_photo(GROUP_ID, photo=WEBINAIRE_JEUDI_IMAGE, caption=RAPPEL_ZOOM_ESTATE_JEUDI_TEXTE, parse_mode="MarkdownV2")
     except Exception as e:
         logger.error(f"Erreur rappel zoom estate jeudi: {e}")
 
 async def post_rappel_zoom_estate_samedi(bot):
     try:
-        with open("rappel_zoom_estate.jpg", "rb") as f:
-            await bot.send_photo(GROUP_ID, photo=f, caption=RAPPEL_ZOOM_ESTATE_SAMEDI_TEXTE, parse_mode="MarkdownV2")
+        await bot.send_photo(GROUP_ID, photo=WEBINAIRE_SAMEDI_IMAGE, caption=RAPPEL_ZOOM_ESTATE_SAMEDI_TEXTE, parse_mode="MarkdownV2")
     except Exception as e:
         logger.error(f"Erreur rappel zoom estate samedi: {e}")
 
