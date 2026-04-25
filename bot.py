@@ -728,11 +728,12 @@ async def post_webinaire_jeudi(bot):
 
 async def post_rappel_jeudi_matin(bot):
     try:
-        await bot.send_message(GROUP_ID,
-            "⏰ *RAPPEL — Webinaire E\\-ESTATE ce soir à 21h00 \\!*\n\n"
-            "🏠 Ne manque pas le Webinaire Immobilier Digital ce soir \\!\n"
-            "🔗 https://meet\\.google\\.com/vqs\\-hzfs\\-qyy\n"
-            "CODE : 433 091 362\\#\n\n"
+        with open("webinaire_jeudi.jpg", "rb") as f:
+            await bot.send_photo(GROUP_ID, photo=f,
+                caption="⏰ *RAPPEL — Webinaire E\\-ESTATE ce soir à 21h00 \\!*\n\n"
+                "🏠 Ne manque pas le Webinaire Immobilier Digital ce soir \\!\n"
+                "🔗 https://meet\\.google\\.com/vqs\\-hzfs\\-qyy\n"
+                "CODE : 433 091 362\\#\n\n"
             "👉 Participation gratuite \\— Invite tes proches \\!",
             parse_mode="MarkdownV2")
     except Exception as e:
@@ -740,13 +741,14 @@ async def post_rappel_jeudi_matin(bot):
 
 async def post_rappel_jeudi_soir(bot):
     try:
-        await bot.send_message(GROUP_ID,
-            "🔥 *DANS 1 HEURE — Webinaire E\\-ESTATE à 21h00 \\!*\n\n"
-            "⚡ C'est ce soir \\! Le Webinaire commence dans 1 heure \\!\n\n"
-            "🔗 https://meet\\.google\\.com/vqs\\-hzfs\\-qyy\n"
-            "CODE : 433 091 362\\#\n\n"
-            "🏠 Créez votre revenu passif avec l'immobilier digital \\!",
-            parse_mode="MarkdownV2")
+        with open("webinaire_jeudi.jpg", "rb") as f:
+            await bot.send_photo(GROUP_ID, photo=f,
+                caption="🔥 *DANS 1 HEURE — Webinaire E\\-ESTATE à 21h00 \\!*\n\n"
+                "⚡ C'est ce soir \\! Le Webinaire commence dans 1 heure \\!\n\n"
+                "🔗 https://meet\\.google\\.com/vqs\\-hzfs\\-qyy\n"
+                "CODE : 433 091 362\\#\n\n"
+                "🏠 Créez votre revenu passif avec l'immobilier digital \\!",
+                parse_mode="MarkdownV2")
     except Exception as e:
         logger.error(f"Erreur rappel jeudi soir: {e}")
 
@@ -756,11 +758,12 @@ async def post_webinaire_samedi(bot):
 
 async def post_rappel_samedi_matin(bot):
     try:
-        await bot.send_message(GROUP_ID,
-            "⏰ *RAPPEL — Webinaire E\\-ESTATE ce soir à 17h00 \\!*\n\n"
-            "🏠 Ne manque pas le Webinaire Immobilier Digital ce soir \\!\n"
-            "🔗 https://meet\\.google\\.com/rzy\\-bgok\\-mwz\n"
-            "CODE : 433 091 362\\#\n\n"
+        with open("webinaire_samedi.jpg", "rb") as f:
+            await bot.send_photo(GROUP_ID, photo=f,
+                caption="⏰ *RAPPEL — Webinaire E\\-ESTATE ce soir à 17h00 \\!*\n\n"
+                "🏠 Ne manque pas le Webinaire Immobilier Digital ce soir \\!\n"
+                "🔗 https://meet\\.google\\.com/rzy\\-bgok\\-mwz\n"
+                "CODE : 433 091 362\\#\n\n"
             "👉 Participation gratuite \\— Invite tes proches \\!",
             parse_mode="MarkdownV2")
     except Exception as e:
@@ -768,13 +771,14 @@ async def post_rappel_samedi_matin(bot):
 
 async def post_rappel_samedi_soir(bot):
     try:
-        await bot.send_message(GROUP_ID,
-            "🔥 *DANS 30 MINUTES — Webinaire E\\-ESTATE à 17h00 \\!*\n\n"
-            "⚡ Le Webinaire commence dans 30 minutes \\!\n\n"
-            "🔗 https://meet\\.google\\.com/rzy\\-bgok\\-mwz\n"
-            "CODE : 433 091 362\\#\n\n"
-            "🏠 Créez votre revenu passif avec l'immobilier digital \\!",
-            parse_mode="MarkdownV2")
+        with open("webinaire_samedi.jpg", "rb") as f:
+            await bot.send_photo(GROUP_ID, photo=f,
+                caption="🔥 *DANS 30 MINUTES — Webinaire E\\-ESTATE à 17h00 \\!*\n\n"
+                "⚡ Le Webinaire commence dans 30 minutes \\!\n\n"
+                "🔗 https://meet\\.google\\.com/rzy\\-bgok\\-mwz\n"
+                "CODE : 433 091 362\\#\n\n"
+                "🏠 Créez votre revenu passif avec l'immobilier digital \\!",
+                parse_mode="MarkdownV2")
     except Exception as e:
         logger.error(f"Erreur rappel samedi soir: {e}")
 
@@ -798,13 +802,15 @@ CODE : 433 091 362\#
 
 async def post_rappel_zoom_estate_jeudi(bot):
     try:
-        await bot.send_photo(GROUP_ID, photo=WEBINAIRE_JEUDI_IMAGE, caption=RAPPEL_ZOOM_ESTATE_JEUDI_TEXTE, parse_mode="MarkdownV2")
+        with open("rappel_zoom_estate.jpg", "rb") as f:
+            await bot.send_photo(GROUP_ID, photo=f, caption=RAPPEL_ZOOM_ESTATE_JEUDI_TEXTE, parse_mode="MarkdownV2")
     except Exception as e:
         logger.error(f"Erreur rappel zoom estate jeudi: {e}")
 
 async def post_rappel_zoom_estate_samedi(bot):
     try:
-        await bot.send_photo(GROUP_ID, photo=WEBINAIRE_SAMEDI_IMAGE, caption=RAPPEL_ZOOM_ESTATE_SAMEDI_TEXTE, parse_mode="MarkdownV2")
+        with open("rappel_zoom_estate.jpg", "rb") as f:
+            await bot.send_photo(GROUP_ID, photo=f, caption=RAPPEL_ZOOM_ESTATE_SAMEDI_TEXTE, parse_mode="MarkdownV2")
     except Exception as e:
         logger.error(f"Erreur rappel zoom estate samedi: {e}")
 
