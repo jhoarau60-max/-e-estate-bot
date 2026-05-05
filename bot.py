@@ -2,6 +2,7 @@ import os
 import logging
 import random
 import asyncio
+import io
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from telegram import Update, Poll, ChatPermissions
@@ -437,6 +438,152 @@ async def handle_john_commands(update: Update, context: ContextTypes.DEFAULT_TYP
 
     return False
 
+# ─── WIKI — INGESTION VEILLE A.I ─────────────────────────────────────────────
+wiki_buffer = []  # [{"content": str, "time": str, "photo_bytes": bytes|None}]
+
+WIKI_DAILY_PROMPT = """Tu es un agent wiki. Compile les éléments ci-dessous en UNE SEULE page Markdown pour un wiki de veille IA.
+
+FORMAT OBLIGATOIRE :
+---
+title: "Veille du {date}"
+type: source
+created: {date}
+updated: {date}
+sources: [veille-{date}]
+tags: [veille-quotidienne]
+---
+
+## Summary
+Synthèse globale de la veille du jour en 2-4 phrases.
+
+## Key Facts
+(liste tous les faits importants de tous les éléments, avec [[liens]])
+
+## Entities Mentioned
+(toutes les entités de tous les éléments)
+
+## Concepts Mentioned
+(tous les concepts de tous les éléments)
+
+## Source Metadata
+- **Date:** {date}
+- **Author:** John Hoarau
+- **Publisher:** veille quotidienne via Elise
+
+## See Also
+(pages wiki liées)
+
+Génère UNIQUEMENT le contenu Markdown. Langue : français.
+
+ÉLÉMENTS DU JOUR :
+{items}"""
+
+async def wikisend_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != JOHN_ID:
+        return
+    if update.effective_chat.type != "private":
+        return
+    await update.message.reply_text("⏳ Push wiki en cours...")
+    await send_wiki_daily(context.bot)
+
+async def wiki_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    logger.info(f"wiki_handler appelé — user_id={user_id} JOHN_ID={JOHN_ID} chat_type={update.effective_chat.type}")
+    if user_id != JOHN_ID:
+        logger.info(f"wiki_handler bloqué — user_id {user_id} != JOHN_ID {JOHN_ID}")
+        return
+    if update.effective_chat.type != "private":
+        logger.info(f"wiki_handler bloqué — pas private: {update.effective_chat.type}")
+        return
+
+    now = datetime.now(PARIS_TZ).strftime("%H:%M")
+    content = ""
+    photo_bytes = None
+
+    if update.message.photo:
+        photo = update.message.photo[-1]
+        file = await context.bot.get_file(photo.file_id)
+        photo_bytes = bytes(await file.download_as_bytearray())
+        content = update.message.caption or "Image"
+    elif update.message.video or update.message.video_note:
+        await update.message.reply_text("⏳ Analyse vidéo en cours...")
+        vid = update.message.video or update.message.video_note
+        file = await context.bot.get_file(vid.file_id)
+        video_bytes = bytes(await file.download_as_bytearray())
+        caption = update.message.caption or "Vidéo"
+        try:
+            from google.genai import types as gtypes
+            video_part = gtypes.Part.from_bytes(data=video_bytes, mime_type="video/mp4")
+            resp = gemini_client.models.generate_content(
+                model=GEMINI_MODEL_NAME,
+                contents=[video_part, "Transcris et résume le contenu de cette vidéo en français. Sois précis et exhaustif."]
+            )
+            content = f"[VIDÉO] {caption}\nContenu : {resp.text.strip()}"
+        except Exception as e:
+            content = f"[VIDÉO] {caption} (analyse échouée: {e})"
+        photo_bytes = None
+    elif context.args:
+        content = " ".join(context.args)
+    elif update.message.reply_to_message:
+        content = update.message.reply_to_message.text or ""
+    else:
+        await update.message.reply_text("Usage: `/wiki <texte ou lien>` ou envoie une image/vidéo avec `/wiki` en légende.", parse_mode="Markdown")
+        return
+
+    wiki_buffer.append({"content": content, "time": now, "photo_bytes": photo_bytes})
+    count = len(wiki_buffer)
+    await update.message.reply_text(f"✅ Noté ({count} élément{'s' if count > 1 else ''} en attente — rapport à 22h)")
+
+async def send_wiki_daily(bot):
+    if not wiki_buffer:
+        return
+    today = datetime.now(PARIS_TZ).strftime("%Y-%m-%d")
+    items_text = ""
+    for i, item in enumerate(wiki_buffer, 1):
+        items_text += f"\n[{i}] ({item['time']}) {item['content']}\n"
+
+    try:
+        from google.genai import types as gtypes
+        contents = []
+        for item in wiki_buffer:
+            if item["photo_bytes"]:
+                contents.append(gtypes.Part.from_bytes(data=item["photo_bytes"], mime_type="image/jpeg"))
+        prompt = WIKI_DAILY_PROMPT.format(date=today, items=items_text)
+        contents.append(prompt)
+        response = gemini_client.models.generate_content(model=GEMINI_MODEL_NAME, contents=contents)
+        md_content = response.text.strip()
+
+        # Push Supabase wiki_knowledge
+        title_match = [l for l in md_content.split('\n') if l.startswith('title:')]
+        title = title_match[0].replace('title:', '').strip().strip('"') if title_match else f"Veille {today}"
+        summary_match = md_content.split('## Summary')
+        summary = summary_match[1].split('##')[0].strip()[:1000] if len(summary_match) > 1 else md_content[:1000]
+
+        sb_payload = {
+            "slug": f"veille-{today}-elise",
+            "title": title,
+            "type": "source",
+            "summary": summary,
+            "full_content": md_content[:5000],
+            "updated_at": datetime.now(PARIS_TZ).isoformat()
+        }
+        try:
+            httpx.post(
+                f"{SUPABASE_URL}/rest/v1/wiki_knowledge",
+                headers={**SUPABASE_HEADERS, "Prefer": "resolution=merge-duplicates"},
+                json=sb_payload,
+                timeout=10
+            )
+            await bot.send_message(chat_id=JOHN_ID, text=f"📚 Veille du {today} ({len(wiki_buffer)} éléments) → wiki Supabase ✅")
+        except Exception as se:
+            logger.error(f"Wiki Supabase push: {se}")
+            await bot.send_message(chat_id=JOHN_ID, text=f"⚠️ Wiki compilé mais Supabase KO : {se}")
+
+        wiki_buffer.clear()
+    except Exception as e:
+        logger.error(f"Wiki daily: {e}")
+        await bot.send_message(chat_id=JOHN_ID, text=f"❌ Erreur rapport wiki : {e}")
+
 # ─── HANDLERS PRIVÉS ─────────────────────────────────────────────────────────
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
@@ -820,6 +967,8 @@ def main():
 
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("reset", reset))
+    app.add_handler(CommandHandler("wiki", wiki_handler))
+    app.add_handler(CommandHandler("wikisend", wikisend_handler))
     app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, on_new_member))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE, handle_private_message))
     app.add_handler(MessageHandler((filters.PHOTO | filters.VIDEO) & filters.ChatType.PRIVATE, handle_private_message))
@@ -847,6 +996,7 @@ def main():
         scheduler.add_job(post_rappel_zoom_estate_jeudi, 'cron', day_of_week='thu', hour=20, minute=50, timezone='Europe/Paris', args=[application.bot])
         scheduler.add_job(post_rappel_zoom_estate_samedi, 'cron', day_of_week='sat', hour=16, minute=50, timezone='Europe/Paris', args=[application.bot])
 
+        scheduler.add_job(send_wiki_daily, 'cron', hour=22, minute=0, timezone='Europe/Paris', args=[application.bot])
         scheduler.start()
         logger.info("✅ Scheduler E-Estate démarré !")
 
