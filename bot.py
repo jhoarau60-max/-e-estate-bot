@@ -489,9 +489,6 @@ async def wikisend_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def wiki_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     logger.info(f"wiki_handler appelé — user_id={user_id} JOHN_ID={JOHN_ID} chat_type={update.effective_chat.type}")
-    if user_id != JOHN_ID:
-        logger.info(f"wiki_handler bloqué — user_id {user_id} != JOHN_ID {JOHN_ID}")
-        return
     if update.effective_chat.type != "private":
         logger.info(f"wiki_handler bloqué — pas private: {update.effective_chat.type}")
         return
