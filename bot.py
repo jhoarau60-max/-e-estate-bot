@@ -527,7 +527,7 @@ async def wiki_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             except Exception as e:
                 placeholder["content"] = f"[VIDÉO] {caption} (analyse échouée: {e})"
         try:
-            await context.bot.forward_message(GROUP_ID, update.effective_chat.id, update.message.message_id)
+            await context.bot.copy_message(chat_id=GROUP_ID, from_chat_id=update.effective_chat.id, message_id=update.message.message_id, caption="")
         except Exception:
             pass
         asyncio.create_task(_transcribe())
