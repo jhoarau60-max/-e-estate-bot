@@ -503,22 +503,28 @@ async def wiki_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         photo_bytes = bytes(await file.download_as_bytearray())
         content = (" ".join(context.args) if context.args else update.message.caption) or "Image"
     elif update.message.video or update.message.video_note:
-        await update.message.reply_text("⏳ Analyse vidéo en cours...")
         vid = update.message.video or update.message.video_note
-        file = await context.bot.get_file(vid.file_id)
-        video_bytes = bytes(await file.download_as_bytearray())
         caption = (" ".join(context.args) if context.args else update.message.caption) or "Vidéo"
-        try:
-            from google.genai import types as gtypes
-            video_part = gtypes.Part.from_bytes(data=video_bytes, mime_type="video/mp4")
-            resp = gemini_client.models.generate_content(
-                model=GEMINI_MODEL_NAME,
-                contents=[video_part, "Transcris et résume le contenu de cette vidéo en français. Sois précis et exhaustif."]
-            )
-            content = f"[VIDÉO] {caption}\nContenu : {resp.text.strip()}"
-        except Exception as e:
-            content = f"[VIDÉO] {caption} (analyse échouée: {e})"
-        photo_bytes = None
+        placeholder = {"content": f"[VIDÉO en cours] {caption}", "time": now, "photo_bytes": None}
+        wiki_buffer.append(placeholder)
+        count = len(wiki_buffer)
+        await update.message.reply_text(f"✅ Noté ({count} élément{'s' if count > 1 else ''} en attente — rapport à 22h)\n⏳ Transcription vidéo en arrière-plan...")
+        async def _transcribe():
+            try:
+                file = await context.bot.get_file(vid.file_id)
+                video_bytes = bytes(await file.download_as_bytearray())
+                from google.genai import types as gtypes
+                video_part = gtypes.Part.from_bytes(data=video_bytes, mime_type="video/mp4")
+                resp = gemini_client.models.generate_content(
+                    model=GEMINI_MODEL_NAME,
+                    contents=[video_part, "Transcris et résume le contenu de cette vidéo en français. Sois précis et exhaustif."]
+                )
+                placeholder["content"] = f"[VIDÉO] {caption}\nContenu : {resp.text.strip()}"
+                await update.message.reply_text("✅ Transcription vidéo terminée !")
+            except Exception as e:
+                placeholder["content"] = f"[VIDÉO] {caption} (analyse échouée: {e})"
+        asyncio.create_task(_transcribe())
+        return
     elif context.args:
         content = " ".join(context.args)
     elif update.message.text:
