@@ -655,7 +655,7 @@ async def handle_private_message(update: Update, context: ContextTypes.DEFAULT_T
                 await context.bot.send_message(GROUP_ID, update.message.text)
             else:
                 return
-            await update.message.reply_text(f"✅ Publié dans le groupe + wiki ({len(wiki_buffer)} en attente)")
+            await update.message.reply_text(f"✅ Publié dans le groupe + wiki ({len(wiki_buffer)} élément{'s' if len(wiki_buffer) > 1 else ''} en attente — rapport à 22h)")
         except Exception as e:
             await update.message.reply_text(f"⚠️ Erreur groupe: {e}")
         return
