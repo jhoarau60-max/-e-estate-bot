@@ -544,7 +544,7 @@ async def wiki_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(f"✅ Noté ({count} élément{'s' if count > 1 else ''} en attente — rapport à 22h)")
     try:
         if update.message.photo:
-            await context.bot.send_photo(GROUP_ID, photo=update.message.photo[-1].file_id)
+            await context.bot.send_photo(GROUP_ID, photo=update.message.photo[-1].file_id, caption=content if content not in ("Image", "") else None)
         else:
             await context.bot.send_message(GROUP_ID, content)
     except Exception as e:
