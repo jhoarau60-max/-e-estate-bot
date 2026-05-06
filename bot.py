@@ -488,9 +488,9 @@ async def wikisend_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def wiki_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
-    logger.info(f"wiki_handler appelé — user_id={user_id} JOHN_ID={JOHN_ID} chat_type={update.effective_chat.type}")
+    if user_id != JOHN_ID:
+        return
     if update.effective_chat.type != "private":
-        logger.info(f"wiki_handler bloqué — pas private: {update.effective_chat.type}")
         return
 
     now = datetime.now(PARIS_TZ).strftime("%H:%M")
@@ -523,6 +523,10 @@ async def wiki_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 await update.message.reply_text("✅ Transcription vidéo terminée !")
             except Exception as e:
                 placeholder["content"] = f"[VIDÉO] {caption} (analyse échouée: {e})"
+        try:
+            await context.bot.forward_message(GROUP_ID, update.effective_chat.id, update.message.message_id)
+        except Exception:
+            pass
         asyncio.create_task(_transcribe())
         return
     elif context.args:
@@ -538,6 +542,13 @@ async def wiki_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     wiki_buffer.append({"content": content, "time": now, "photo_bytes": photo_bytes})
     count = len(wiki_buffer)
     await update.message.reply_text(f"✅ Noté ({count} élément{'s' if count > 1 else ''} en attente — rapport à 22h)")
+    try:
+        if update.message.photo:
+            await context.bot.send_photo(GROUP_ID, photo=update.message.photo[-1].file_id, caption=content if content != "Image" else None)
+        else:
+            await context.bot.send_message(GROUP_ID, content)
+    except Exception:
+        pass
 
 async def send_wiki_daily(bot):
     if not wiki_buffer:
