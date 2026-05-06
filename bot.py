@@ -521,6 +521,8 @@ async def wiki_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         photo_bytes = None
     elif context.args:
         content = " ".join(context.args)
+    elif update.message.text:
+        content = update.message.text
     elif update.message.reply_to_message:
         content = update.message.reply_to_message.text or ""
     else:
@@ -968,6 +970,7 @@ def main():
     app.add_handler(CommandHandler("wikisend", wikisend_handler))
     app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, on_new_member))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE, handle_private_message))
+    app.add_handler(MessageHandler((filters.Entity("url") | filters.Entity("text_link")) & filters.ChatType.PRIVATE, wiki_handler))
     app.add_handler(MessageHandler((filters.PHOTO | filters.VIDEO | filters.VIDEO_NOTE) & filters.ChatType.PRIVATE & filters.CaptionRegex(r'^/wiki'), wiki_handler))
     app.add_handler(MessageHandler((filters.PHOTO | filters.VIDEO) & filters.ChatType.PRIVATE, handle_private_message))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.GROUPS, handle_group_message))
