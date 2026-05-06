@@ -547,8 +547,8 @@ async def wiki_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await context.bot.send_photo(GROUP_ID, photo=update.message.photo[-1].file_id, caption=content if content != "Image" else None)
         else:
             await context.bot.send_message(GROUP_ID, content)
-    except Exception:
-        pass
+    except Exception as e:
+        await update.message.reply_text(f"⚠️ Groupe KO: {e}")
 
 async def send_wiki_daily(bot):
     if not wiki_buffer:
