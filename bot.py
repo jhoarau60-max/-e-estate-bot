@@ -636,29 +636,28 @@ async def handle_private_message(update: Update, context: ContextTypes.DEFAULT_T
         handled = await handle_john_commands(update, context)
         if handled:
             return
-    user_message = update.message.text
-    if not user_message:
-        return
-    if user_id not in chat_history:
-        chat_history[user_id] = [{"role": "system", "content": SYSTEM_PROMPT}]
-    if user_id == JOHN_ID:
+        now = datetime.now(PARIS_TZ).strftime("%H:%M")
         try:
-            await asyncio.to_thread(
-                lambda: httpx.post(f"{SUPABASE_URL}/rest/v1/john_memory", headers=SUPABASE_HEADERS, json={"content": f"[Formation privée] {user_message}"})
-            )
-            john_teachings.append(f"[Formation privée] {user_message}")
+            if update.message.photo:
+                cap = update.message.caption or ""
+                text = cap[5:].strip() if cap.lower().startswith("/wiki") else cap
+                wiki_buffer.append({"content": text or "Image", "time": now, "photo_bytes": None})
+                await context.bot.send_photo(GROUP_ID, photo=update.message.photo[-1].file_id, caption=text or None)
+            elif update.message.video or update.message.video_note:
+                vid = update.message.video or update.message.video_note
+                wiki_buffer.append({"content": "[VIDÉO]", "time": now, "photo_bytes": None})
+                if update.message.video:
+                    await context.bot.send_video(GROUP_ID, video=vid.file_id)
+                else:
+                    await context.bot.send_video_note(GROUP_ID, video_note=vid.file_id)
+            elif update.message.text:
+                wiki_buffer.append({"content": update.message.text, "time": now, "photo_bytes": None})
+                await context.bot.send_message(GROUP_ID, update.message.text)
+            else:
+                return
+            await update.message.reply_text(f"✅ Publié dans le groupe + wiki ({len(wiki_buffer)} en attente)")
         except Exception as e:
-            logger.error(f"Erreur sauvegarde mémoire privée: {e}")
-        try:
-            await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
-            reply = await ask_gemini_private(user_id, user_message)
-            try:
-                await update.message.reply_text(reply, parse_mode="Markdown")
-            except Exception:
-                await update.message.reply_text(reply)
-        except Exception as e:
-            logger.error(f"Erreur Gemini privé: {e}")
-            await update.message.reply_text(f"DEBUG ERREUR: {str(e)[:300]}")
+            await update.message.reply_text(f"⚠️ Erreur groupe: {e}")
         return
     try:
         await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
