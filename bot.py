@@ -501,7 +501,10 @@ async def wiki_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         photo = update.message.photo[-1]
         file = await context.bot.get_file(photo.file_id)
         photo_bytes = bytes(await file.download_as_bytearray())
-        content = (" ".join(context.args) if context.args else update.message.caption) or "Image"
+        _cap = (update.message.caption or "")
+        if _cap.lower().startswith("/wiki"):
+            _cap = _cap[5:].strip()
+        content = (" ".join(context.args) if context.args else _cap) or "Image"
     elif update.message.video or update.message.video_note:
         vid = update.message.video or update.message.video_note
         caption = (" ".join(context.args) if context.args else update.message.caption) or "Vidéo"
