@@ -969,7 +969,7 @@ def main():
     app.add_handler(CommandHandler("wiki", wiki_handler))
     app.add_handler(CommandHandler("wikisend", wikisend_handler))
     app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, on_new_member))
-    app.add_handler(MessageHandler((filters.Entity("url") | filters.Entity("text_link")) & filters.ChatType.PRIVATE, wiki_handler))
+    app.add_handler(MessageHandler(filters.Regex(r'https?://\S+') & filters.ChatType.PRIVATE, wiki_handler))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE, handle_private_message))
     app.add_handler(MessageHandler((filters.PHOTO | filters.VIDEO | filters.VIDEO_NOTE) & filters.ChatType.PRIVATE & filters.CaptionRegex(r'^/wiki'), wiki_handler))
     app.add_handler(MessageHandler((filters.PHOTO | filters.VIDEO) & filters.ChatType.PRIVATE, handle_private_message))
