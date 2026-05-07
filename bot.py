@@ -1087,10 +1087,15 @@ def main():
         scheduler.add_job(post_rappel_zoom_estate_samedi, 'cron', day_of_week='sat', hour=16, minute=50, timezone='Europe/Paris', args=[application.bot])
 
         scheduler.add_job(send_wiki_daily, 'cron', hour=22, minute=0, timezone='Europe/Paris', args=[application.bot])
-        scheduler.add_job(poll_bot_tasks, 'interval', seconds=30, args=[application.bot])
         load_pending_items()
         scheduler.start()
-        logger.info(f"✅ Scheduler E-Estate démarré ! ({scheduler.get_jobs().__len__()} jobs)")
+
+        async def poll_loop():
+            while True:
+                await poll_bot_tasks(application.bot)
+                await asyncio.sleep(30)
+        asyncio.create_task(poll_loop())
+        logger.info(f"✅ Scheduler E-Estate démarré ! ({scheduler.get_jobs().__len__()} jobs + poll_loop)")
 
     app.post_init = post_init
     logger.info("✅ Bot E-Estate Élise démarré !")
