@@ -596,6 +596,36 @@ async def wiki_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         await update.message.reply_text(f"⚠️ Groupe KO: {e}")
 
+async def poll_bot_tasks(bot):
+    try:
+        r = httpx.get(
+            f"{SUPABASE_URL}/rest/v1/bot_tasks?target_bot=eq.{BOT_NAME}&status=eq.pending&order=created_at.asc",
+            headers=SUPABASE_HEADERS,
+            timeout=10
+        )
+        tasks = r.json()
+        if not tasks:
+            return
+        now = datetime.now(PARIS_TZ).strftime("%H:%M")
+        for task in tasks:
+            content = task.get("content", "")
+            task_id = task.get("id")
+            wiki_buffer.append({"content": content, "time": now, "photo_bytes": None})
+            persist_item(content)
+            try:
+                await bot.send_message(GROUP_ID, content)
+            except Exception as e:
+                logger.error(f"poll_bot_tasks send_group: {e}")
+            httpx.patch(
+                f"{SUPABASE_URL}/rest/v1/bot_tasks?id=eq.{task_id}",
+                headers=SUPABASE_HEADERS,
+                json={"status": "done"},
+                timeout=5
+            )
+            logger.info(f"✅ Task {task_id} traitée par Elise")
+    except Exception as e:
+        logger.error(f"poll_bot_tasks: {e}")
+
 async def send_wiki_daily(bot):
     if not wiki_buffer:
         return
@@ -1064,6 +1094,7 @@ def main():
         scheduler.add_job(post_rappel_zoom_estate_samedi, 'cron', day_of_week='sat', hour=16, minute=50, timezone='Europe/Paris', args=[application.bot])
 
         scheduler.add_job(send_wiki_daily, 'cron', hour=22, minute=0, timezone='Europe/Paris', args=[application.bot])
+        scheduler.add_job(poll_bot_tasks, 'interval', seconds=30, args=[application.bot])
         load_pending_items()
         scheduler.start()
         logger.info("✅ Scheduler E-Estate démarré !")
