@@ -1090,7 +1090,7 @@ def main():
         scheduler.add_job(poll_bot_tasks, 'interval', seconds=30, args=[application.bot])
         load_pending_items()
         scheduler.start()
-        logger.info("✅ Scheduler E-Estate démarré !")
+        logger.info(f"✅ Scheduler E-Estate démarré ! ({scheduler.get_jobs().__len__()} jobs)")
 
     app.post_init = post_init
     logger.info("✅ Bot E-Estate Élise démarré !")
