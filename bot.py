@@ -565,13 +565,6 @@ async def wiki_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 await update.message.reply_text("✅ Transcription vidéo terminée !")
             except Exception as e:
                 placeholder["content"] = f"[VIDÉO] {caption} (analyse échouée: {e})"
-        try:
-            if update.message.video:
-                await context.bot.send_video(GROUP_ID, video=vid.file_id)
-            else:
-                await context.bot.send_video_note(GROUP_ID, video_note=vid.file_id)
-        except Exception:
-            pass
         asyncio.create_task(_transcribe())
         return
     elif context.args:
@@ -588,13 +581,6 @@ async def wiki_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     persist_item(content)
     count = len(wiki_buffer)
     await update.message.reply_text(f"✅ Noté ({count} élément{'s' if count > 1 else ''} en attente — rapport à 22h)")
-    try:
-        if update.message.photo:
-            await context.bot.send_photo(GROUP_ID, photo=update.message.photo[-1].file_id, caption=content if content not in ("Image", "") else None)
-        else:
-            await context.bot.send_message(GROUP_ID, content)
-    except Exception as e:
-        await update.message.reply_text(f"⚠️ Groupe KO: {e}")
 
 async def poll_bot_tasks(bot):
     try:
@@ -610,10 +596,17 @@ async def poll_bot_tasks(bot):
         for task in tasks:
             content = task.get("content", "")
             task_id = task.get("id")
+            file_id = task.get("file_id")
+            media_type = task.get("media_type")
             wiki_buffer.append({"content": content, "time": now, "photo_bytes": None})
             persist_item(content)
             try:
-                await bot.send_message(GROUP_ID, content)
+                if media_type == "photo" and file_id:
+                    await bot.send_photo(GROUP_ID, photo=file_id, caption=content or None)
+                elif media_type == "video" and file_id:
+                    await bot.send_video(GROUP_ID, video=file_id, caption=content or None)
+                elif content:
+                    await bot.send_message(GROUP_ID, content)
             except Exception as e:
                 logger.error(f"poll_bot_tasks send_group: {e}")
             httpx.patch(
