@@ -228,7 +228,16 @@ NE JAMAIS mentionner d'autres plateformes concurrentes directement.
 """
 
 
-GEMINI_MODEL_NAME = "gemini-2.5-flash"
+def _probe_gemini_model() -> str:
+    for m in ["gemini-2.5-flash", "gemini-2.0-flash-001", "gemini-1.5-flash"]:
+        try:
+            gemini_client.models.generate_content(model=m, contents="hi")
+            return m
+        except Exception:
+            continue
+    return "gemini-1.5-flash"
+
+GEMINI_MODEL_NAME = _probe_gemini_model()
 
 JOHN_ID = 7385702412
 john_teachings = []
