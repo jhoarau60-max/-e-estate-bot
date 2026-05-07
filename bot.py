@@ -601,20 +601,21 @@ async def poll_bot_tasks(bot):
             thread_id = task.get("thread_id")
             wiki_buffer.append({"content": content, "time": now, "photo_bytes": None})
             persist_item(content)
+            caption = content[:1024] if content else None
             try:
                 if media_type == "photo" and file_id:
-                    await bot.send_photo(GROUP_ID, photo=file_id, caption=content or None, message_thread_id=thread_id)
+                    await bot.send_photo(GROUP_ID, photo=file_id, caption=caption, message_thread_id=thread_id)
                 elif media_type == "video" and file_id:
-                    await bot.send_video(GROUP_ID, video=file_id, caption=content or None, message_thread_id=thread_id)
+                    await bot.send_video(GROUP_ID, video=file_id, caption=caption, message_thread_id=thread_id)
                 elif content:
                     await bot.send_message(GROUP_ID, content, message_thread_id=thread_id)
             except Exception as e:
                 logger.error(f"poll_bot_tasks send_group (thread {thread_id}): {e}")
                 try:
                     if media_type == "photo" and file_id:
-                        await bot.send_photo(GROUP_ID, photo=file_id, caption=content or None)
+                        await bot.send_photo(GROUP_ID, photo=file_id, caption=caption)
                     elif media_type == "video" and file_id:
-                        await bot.send_video(GROUP_ID, video=file_id, caption=content or None)
+                        await bot.send_video(GROUP_ID, video=file_id, caption=caption)
                     elif content:
                         await bot.send_message(GROUP_ID, content)
                 except Exception as e2:
