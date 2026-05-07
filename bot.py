@@ -609,7 +609,16 @@ async def poll_bot_tasks(bot):
                 elif content:
                     await bot.send_message(GROUP_ID, content, message_thread_id=thread_id)
             except Exception as e:
-                logger.error(f"poll_bot_tasks send_group: {e}")
+                logger.error(f"poll_bot_tasks send_group (thread {thread_id}): {e}")
+                try:
+                    if media_type == "photo" and file_id:
+                        await bot.send_photo(GROUP_ID, photo=file_id, caption=content or None)
+                    elif media_type == "video" and file_id:
+                        await bot.send_video(GROUP_ID, video=file_id, caption=content or None)
+                    elif content:
+                        await bot.send_message(GROUP_ID, content)
+                except Exception as e2:
+                    logger.error(f"poll_bot_tasks fallback: {e2}")
             httpx.patch(
                 f"{SUPABASE_URL}/rest/v1/bot_tasks?id=eq.{task_id}",
                 headers=SUPABASE_HEADERS,
