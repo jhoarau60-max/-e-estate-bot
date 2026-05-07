@@ -440,6 +440,44 @@ async def handle_john_commands(update: Update, context: ContextTypes.DEFAULT_TYP
 
 # ─── WIKI — INGESTION VEILLE A.I ─────────────────────────────────────────────
 wiki_buffer = []  # [{"content": str, "time": str, "photo_bytes": bytes|None}]
+BOT_NAME = "elise"
+
+def persist_item(content: str):
+    try:
+        httpx.post(
+            f"{SUPABASE_URL}/rest/v1/wiki_buffer_pending",
+            headers=SUPABASE_HEADERS,
+            json={"bot_name": BOT_NAME, "content": content},
+            timeout=5
+        )
+    except Exception as e:
+        logger.error(f"persist_item: {e}")
+
+def load_pending_items():
+    try:
+        r = httpx.get(
+            f"{SUPABASE_URL}/rest/v1/wiki_buffer_pending?bot_name=eq.{BOT_NAME}&order=captured_at.asc",
+            headers=SUPABASE_HEADERS,
+            timeout=10
+        )
+        rows = r.json()
+        now = datetime.now(PARIS_TZ).strftime("%H:%M")
+        for row in rows:
+            wiki_buffer.append({"content": row["content"], "time": row.get("captured_at", now)[:16], "photo_bytes": None})
+        if rows:
+            logger.info(f"✅ {len(rows)} items rechargés depuis wiki_buffer_pending")
+    except Exception as e:
+        logger.error(f"load_pending_items: {e}")
+
+def clear_pending_items():
+    try:
+        httpx.delete(
+            f"{SUPABASE_URL}/rest/v1/wiki_buffer_pending?bot_name=eq.{BOT_NAME}",
+            headers=SUPABASE_HEADERS,
+            timeout=10
+        )
+    except Exception as e:
+        logger.error(f"clear_pending_items: {e}")
 
 WIKI_DAILY_PROMPT = """Tu es un agent wiki. Compile les éléments ci-dessous en UNE SEULE page Markdown pour un wiki de veille IA.
 
@@ -510,6 +548,7 @@ async def wiki_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         caption = (" ".join(context.args) if context.args else update.message.caption) or "Vidéo"
         placeholder = {"content": f"[VIDÉO en cours] {caption}", "time": now, "photo_bytes": None}
         wiki_buffer.append(placeholder)
+        persist_item(placeholder["content"])
         count = len(wiki_buffer)
         await update.message.reply_text(f"✅ Noté ({count} élément{'s' if count > 1 else ''} en attente — rapport à 22h)\n⏳ Transcription vidéo en arrière-plan...")
         async def _transcribe():
@@ -546,6 +585,7 @@ async def wiki_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     wiki_buffer.append({"content": content, "time": now, "photo_bytes": photo_bytes})
+    persist_item(content)
     count = len(wiki_buffer)
     await update.message.reply_text(f"✅ Noté ({count} élément{'s' if count > 1 else ''} en attente — rapport à 22h)")
     try:
@@ -602,6 +642,7 @@ async def send_wiki_daily(bot):
             await bot.send_message(chat_id=JOHN_ID, text=f"⚠️ Wiki compilé mais Supabase KO : {se}")
 
         wiki_buffer.clear()
+        clear_pending_items()
     except Exception as e:
         logger.error(f"Wiki daily: {e}")
         await bot.send_message(chat_id=JOHN_ID, text=f"❌ Erreur rapport wiki : {e}")
@@ -642,16 +683,19 @@ async def handle_private_message(update: Update, context: ContextTypes.DEFAULT_T
                 cap = update.message.caption or ""
                 text = cap[5:].strip() if cap.lower().startswith("/wiki") else cap
                 wiki_buffer.append({"content": text or "Image", "time": now, "photo_bytes": None})
+                persist_item(text or "Image")
                 await context.bot.send_photo(GROUP_ID, photo=update.message.photo[-1].file_id, caption=text or None)
             elif update.message.video or update.message.video_note:
                 vid = update.message.video or update.message.video_note
                 wiki_buffer.append({"content": "[VIDÉO]", "time": now, "photo_bytes": None})
+                persist_item("[VIDÉO]")
                 if update.message.video:
                     await context.bot.send_video(GROUP_ID, video=vid.file_id)
                 else:
                     await context.bot.send_video_note(GROUP_ID, video_note=vid.file_id)
             elif update.message.text:
                 wiki_buffer.append({"content": update.message.text, "time": now, "photo_bytes": None})
+                persist_item(update.message.text)
                 await context.bot.send_message(GROUP_ID, update.message.text)
             else:
                 return
@@ -1020,6 +1064,7 @@ def main():
         scheduler.add_job(post_rappel_zoom_estate_samedi, 'cron', day_of_week='sat', hour=16, minute=50, timezone='Europe/Paris', args=[application.bot])
 
         scheduler.add_job(send_wiki_daily, 'cron', hour=22, minute=0, timezone='Europe/Paris', args=[application.bot])
+        load_pending_items()
         scheduler.start()
         logger.info("✅ Scheduler E-Estate démarré !")
 
