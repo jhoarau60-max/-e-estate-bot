@@ -598,15 +598,16 @@ async def poll_bot_tasks(bot):
             task_id = task.get("id")
             file_id = task.get("file_id")
             media_type = task.get("media_type")
+            thread_id = task.get("thread_id")
             wiki_buffer.append({"content": content, "time": now, "photo_bytes": None})
             persist_item(content)
             try:
                 if media_type == "photo" and file_id:
-                    await bot.send_photo(GROUP_ID, photo=file_id, caption=content or None)
+                    await bot.send_photo(GROUP_ID, photo=file_id, caption=content or None, message_thread_id=thread_id)
                 elif media_type == "video" and file_id:
-                    await bot.send_video(GROUP_ID, video=file_id, caption=content or None)
+                    await bot.send_video(GROUP_ID, video=file_id, caption=content or None, message_thread_id=thread_id)
                 elif content:
-                    await bot.send_message(GROUP_ID, content)
+                    await bot.send_message(GROUP_ID, content, message_thread_id=thread_id)
             except Exception as e:
                 logger.error(f"poll_bot_tasks send_group: {e}")
             httpx.patch(
